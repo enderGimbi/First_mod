@@ -1,0 +1,28 @@
+{
+  "schemaVersion": 1,
+  "id": "my_first_mod",
+  "version": "${version}",
+  "name": "My Mod",
+  "description": "",
+  "authors": [],
+  "contact": {},
+  "license": "All-Rights-Reserved",
+  "icon": "assets/my_first_mod/icon.png",
+  "environment": "*",
+  "entrypoints": {
+    "client": [
+      "me.kirill.my_first_mod.client.My_first_modClient"
+    ],
+    "main": [
+      "me.kirill.my_first_mod.My_first_mod"
+    ]
+  },
+  "mixins": [
+    "my_first_mod.mixins.json"
+  ],
+  "depends": {
+    "fabricloader": ">=${loader_version}",
+    "fabric-api": "*",
+    "minecraft": "${minecraft_version}"
+  }
+}
