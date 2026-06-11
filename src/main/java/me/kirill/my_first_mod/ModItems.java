@@ -1,5 +1,6 @@
 package me.kirill.my_first_mod;
 
+import my_first_mod.item.SuperBreadItem;
 import net.fabricmc.fabric.api.itemgroup.v1.ItemGroupEvents;
 import net.minecraft.entity.effect.StatusEffectInstance;
 import net.minecraft.entity.effect.StatusEffects;
@@ -10,14 +11,15 @@ import net.minecraft.util.Identifier;
 
 public class ModItems {
 
-    public static final Item SUPER_BREAD = new Item(new Item.Settings()
+    public static final Item SUPER_BREAD = new SuperBreadItem(new Item.Settings()
             .maxCount(8)
             .food(new FoodComponent.Builder()
                     .hunger(5)
                     .saturationModifier(0.6f)
                     .statusEffect(new StatusEffectInstance(StatusEffects.REGENERATION, 200,1),0.1f)
                     .build()
-            )
+            ),
+            3
     )
 // Свечение хлебушка как зачарованного
 //    {

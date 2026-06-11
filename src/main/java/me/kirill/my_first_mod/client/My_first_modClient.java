@@ -8,8 +8,8 @@ import net.minecraft.util.Identifier;
 public class My_first_modClient implements ClientModInitializer {
 
     // Выносим переменную наружу (как поле класса или статическую переменную),
-// чтобы игра помнила, какая стадия была в предыдущем кадре.
-// Добавьте эту строчку ПЕРЕД методом @Override onInitializeClient() или внутри класса:
+    // чтобы игра помнила, какая стадия была в предыдущем кадре.
+    // Добавьте эту строчку ПЕРЕД методом @Override onInitializeClient() или внутри класса:
     private static float lastStage = -1.0f;
 
     @Override
@@ -22,36 +22,39 @@ public class My_first_modClient implements ClientModInitializer {
                         return 0.0f;
                     }
 
-                    float currentStage = 0.0f;
+                    float currentStage = 0.0f; // Стадия поедания (в обратном порядке)
+
+                    int damage = stack.getOrCreateNbt().getInt("Bites");
+
 
                     if (entity.isUsingItem() && entity.getActiveItem() == stack) {
                         int timeLeft = entity.getItemUseTimeLeft();
 
                         if (timeLeft <= 2) {
-                            currentStage = 0.750f; // Остаток
-                        }
-                        else if (timeLeft <= 8) {
-                            currentStage = 0.625f;
-                        }
-                        else if (timeLeft <= 12) {
-                            currentStage = 0.5f;
-                        }
-                        else if (timeLeft <= 18) {
-                            currentStage = 0.375f;
-                        }
-                        else if (timeLeft <= 22) {
-                            currentStage = 0.25f;
-                        }
-                        else if (timeLeft <= 28) {
-                            currentStage = 0.125f;
-                        }
-                        else {
-                            currentStage = 0.0f; // Целый
+                            return 0.750f; // Остаток
+                        } else if (timeLeft <= 8) {
+                            return 0.625f;
+                        } else if (timeLeft <= 12) {
+                            return 0.5f;
+                        } else if (timeLeft <= 18) {
+                            return 0.375f;
+                        } else if (timeLeft <= 22) {
+                            return 0.25f;
+                        } else if (timeLeft <= 28) {
+                            return 0.125f;
+                        } else {
+                            return 0.0f; // Целый
                         }
                     }
 
+                    if (damage == 1) {
+                        return 0.25f;
+                    } else if (damage >= 2) {
+                        return 0.5f;
+                    }
                     return currentStage;
                 }
+
         );
     }
 }
