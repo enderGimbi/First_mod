@@ -1,0 +1,10 @@
+{
+  "type": "minecraft:blasting",
+  "category": "food",
+  "ingredient": {
+    "item": "minecraft:bread"
+  },
+  "result":"my_first_mod:super_bread",
+  "experience": 0.35,
+  "cookingtime": 1
+}
