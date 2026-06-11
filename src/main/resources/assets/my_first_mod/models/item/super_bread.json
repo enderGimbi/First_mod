@@ -6,15 +6,39 @@
   "overrides": [
     {
       "predicate": {
-        "my_first_mod:eating_stage": 0.33
+        "my_first_mod:eating_stage": 0.125
+      },
+      "model": "my_first_mod:item/super_bread_prebitten"
+    },
+    {
+      "predicate": {
+        "my_first_mod:eating_stage": 0.25
       },
       "model": "my_first_mod:item/super_bread_bitten"
     },
     {
       "predicate": {
-        "my_first_mod:eating_stage": 0.66
+        "my_first_mod:eating_stage": 0.375
+      },
+      "model": "my_first_mod:item/super_bread_postbitten"
+    },
+    {
+      "predicate": {
+        "my_first_mod:eating_stage": 0.5
+      },
+      "model": "my_first_mod:item/super_bread_precrust"
+    },
+    {
+      "predicate": {
+        "my_first_mod:eating_stage": 0.625
       },
       "model": "my_first_mod:item/super_bread_crust"
+    },
+    {
+      "predicate": {
+        "my_first_mod:eating_stage": 0.750
+      },
+      "model": "my_first_mod:item/super_bread_postcrust"
     }
   ]
 }
