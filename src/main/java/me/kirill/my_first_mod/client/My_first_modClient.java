@@ -8,8 +8,8 @@ import net.minecraft.util.Identifier;
 public class My_first_modClient implements ClientModInitializer {
 
     // Выносим переменную наружу (как поле класса или статическую переменную),
-// чтобы игра помнила, какая стадия была в предыдущем кадре.
-// Добавьте эту строчку ПЕРЕД методом @Override onInitializeClient() или внутри класса:
+    // чтобы игра помнила, какая стадия была в предыдущем кадре.
+    // Добавьте эту строчку ПЕРЕД методом @Override onInitializeClient() или внутри класса:
     private static float lastStage = -1.0f;
 
     @Override
@@ -27,6 +27,7 @@ public class My_first_modClient implements ClientModInitializer {
                     if (entity.isUsingItem() && entity.getActiveItem() == stack) {
                         int timeLeft = entity.getItemUseTimeLeft();
 
+                        // Стадии поедания хлеба
                         if (timeLeft <= 14) {
                             currentStage = 0.66f; // Горбушка
                         } else if (timeLeft <= 26) {
