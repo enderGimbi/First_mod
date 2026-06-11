@@ -27,11 +27,25 @@ public class My_first_modClient implements ClientModInitializer {
                     if (entity.isUsingItem() && entity.getActiveItem() == stack) {
                         int timeLeft = entity.getItemUseTimeLeft();
 
-                        if (timeLeft <= 14) {
-                            currentStage = 0.66f; // Горбушка
-                        } else if (timeLeft <= 26) {
-                            currentStage = 0.33f; // Половинка
-                        } else {
+                        if (timeLeft <= 2) {
+                            currentStage = 0.750f; // Остаток
+                        }
+                        else if (timeLeft <= 8) {
+                            currentStage = 0.625f;
+                        }
+                        else if (timeLeft <= 12) {
+                            currentStage = 0.5f;
+                        }
+                        else if (timeLeft <= 18) {
+                            currentStage = 0.375f;
+                        }
+                        else if (timeLeft <= 22) {
+                            currentStage = 0.25f;
+                        }
+                        else if (timeLeft <= 28) {
+                            currentStage = 0.125f;
+                        }
+                        else {
                             currentStage = 0.0f; // Целый
                         }
                     }
