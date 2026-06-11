@@ -2,5 +2,19 @@
   "parent": "item/generated",
   "textures": {
     "layer0": "my_first_mod:item/super_bread_base"
-  }
+  },
+  "overrides": [
+    {
+      "predicate": {
+        "my_first_mod:eating_stage": 0.33
+      },
+      "model": "my_first_mod:item/super_bread_bitten"
+    },
+    {
+      "predicate": {
+        "my_first_mod:eating_stage": 0.66
+      },
+      "model": "my_first_mod:item/super_bread_crust"
+    }
+  ]
 }

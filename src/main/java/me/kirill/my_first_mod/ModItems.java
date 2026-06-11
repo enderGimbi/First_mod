@@ -15,8 +15,6 @@ public class ModItems {
             .food(new FoodComponent.Builder()
                     .hunger(5)
                     .saturationModifier(0.6f)
-                    .snack()
-                    .alwaysEdible()
                     .build()
             )
     ){
@@ -28,6 +26,7 @@ public class ModItems {
 
 
     public static void registerModItems() {
+
         // Регистрация
         Registry.register(Registries.ITEM, new Identifier("my_first_mod", "super_bread"), SUPER_BREAD);
 
