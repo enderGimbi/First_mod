@@ -1,4 +1,4 @@
-package my_first_mod.item; // Укажите ваш пакет
+package me.kirill.my_first_mod; // Твой пакет
 
 import net.minecraft.client.item.TooltipContext;
 import net.minecraft.entity.LivingEntity;
@@ -13,73 +13,94 @@ import org.jetbrains.annotations.Nullable;
 import java.util.List;
 
 public class SuperBreadItem extends Item {
-    private final int maxBites;
 
-    public SuperBreadItem(Settings settings,int maxBites) {
+    public SuperBreadItem(Settings settings) {
         super(settings);
-        this.maxBites = maxBites;
     }
 
-    public int getRemainingBites(ItemStack stack){
-        if(!stack.hasNbt()){
-            return this.maxBites;
-        }
-        int currentBites = stack.getNbt().getInt("My_first_mod_Bites");
-        return Math.max(0,this.maxBites-currentBites);
-    }
-
-    public int getMaxBites(){
-        return this.maxBites;
-    }
-
-    // МЕХАНИКА МНОГОРАЗОВОСТИ: Вызывается, когда игрок закончил есть
+    /**
+     * Для реализации правильной логики многоразового хлеба для него, в обход стандартным функциям, написана
+     * своя логика поедания (при желании, Вова, можешь прикрутить тут свои звуки или же сменить координаты
+     * воспроизводимого звука)
+     * @param stack
+     * @param world
+     * @param user
+     * @return {@code stack}
+     */
     @Override
     public ItemStack finishUsing(ItemStack stack, World world, LivingEntity user) {
-        // Вызываем стандартное насыщение
-        ItemStack resultStack = super.finishUsing(stack, world, user);
+        // Проверяем, является ли предмет едой (наш хлеб является)
+        if (this.isFood()) {
 
-        if (user instanceof PlayerEntity player && !world.isClient) {
-            // Создаем или получаем кастомный NBT-тег предмета
-            var nbt = stack.getOrCreateNbt();
+            /**
+             * Вместо использования {@code "user.eatFood(world,stack)"}
+             * сами пишем что будет происходить с предметом, а также с игроком
+             *
+             * Функция, что избегаем выше после съедения хлебушка его удаляет игнорируя прочность (damage)
+             */
+            world.playSound(null, user.getX(), user.getY(), user.getZ(),
+                    user.getEatSound(stack),
+                    net.minecraft.sound.SoundCategory.NEUTRAL, 1.0F, 1.0F + (world.random.nextFloat() - world.random.nextFloat()) * 0.4F);
 
-            // Читаем, сколько укусов уже сделано (по умолчанию 0)
-            int bites = nbt.getInt("My_first_mod_Bites");
-            bites++;
+            // Начисление сытости, если это игрок
+            if (user instanceof PlayerEntity player) {
+                player.getHungerManager().add(this.getFoodComponent().getHunger(), this.getFoodComponent().getSaturationModifier());
 
-            if (bites >= 3) {
-                // Если укусили 3 раза — уменьшаем стак хлеба на 1 штуку
-                stack.decrement(1);
-            } else {
-                // Иначе — просто записываем новую стадию укуса в этот конкретный хлеб!
-                nbt.putInt("My_first_mod_Bites", bites);
+                // Проигрываем звук сытости
+                world.playSound(null, player.getX(), player.getY(), player.getZ(),
+                        net.minecraft.sound.SoundEvents.ENTITY_PLAYER_BURP,
+                        net.minecraft.sound.SoundCategory.PLAYERS, 0.5F, world.random.nextFloat() * 0.1F + 0.9F);
+            }
+
+            // Накатываем эффекты
+            if (!world.isClient && this.getFoodComponent() != null) {
+                this.getFoodComponent().getStatusEffects().forEach(pair -> {
+                    if (world.random.nextFloat() < pair.getSecond()) {
+                        user.addStatusEffect(new net.minecraft.entity.effect.StatusEffectInstance(pair.getFirst()));
+                    }
+                });
             }
         }
-        return resultStack;
+
+        // Если игрок в креативе — возвращаем целый предмет
+        if (user instanceof PlayerEntity player && player.getAbilities().creativeMode) {
+            return stack;
+        }
+
+        // Для выживания: вместо ванильного уменьшения стака (замена stack.decrement из user.eatFood)
+        if (!world.isClient && user instanceof PlayerEntity player) {
+            stack.damage(1, player, (p) -> {
+                // Пустышка, чтобы ничего не происходило при ломании хлеба (можно поиграться и добавить ловушек :)) )
+            });
+        }
+
+        return stack;
     }
 
-    // НАСТРОЙКА ЦВЕТА ПОЛОСКИ: Сделаем её, например, золотой или оранжевой
+    // Видимость полоски прочности
+    @Override
+    public boolean isItemBarVisible(ItemStack stack) {
+        // Полоска видна, если текущий урон (укусы) больше нуля
+        return stack.getDamage() > 0;
+    }
+
+    // В целом из названия понятно
     @Override
     public int getItemBarColor(ItemStack stack) {
-        return 0xFFAA00; // Шестнадцатеричный код цвета (Gold/Orange)
+        return 0xFFAA00; // Золотой цвет/оранжевый
     }
 
-    // ДИНАМИЧЕСКОЕ ОПИСАНИЕ (TOOLTIP)
+    // Отображение при наведении сколько осталось использований (можно будет заменить на визуальное отображение)
     @Override
     public void appendTooltip(ItemStack stack, @Nullable World world, List<Text> tooltip, TooltipContext context) {
-        // Вычисляем, сколько порций осталось
-        // Тка как maxDamage = 3, а damage растет от 0 до 3:
-        int remainingUses = getRemainingBites(stack);
+        int maxUses = stack.getMaxDamage();
+        int currentDamage = stack.getDamage();
+        int remainingUses = maxUses - currentDamage;
 
-        // Добавляем красивую строчку в описание
         tooltip.add(Text.literal("Осталось порций: ")
                 .append(Text.literal(String.valueOf(remainingUses)).formatted(Formatting.GREEN))
-                .append(Text.literal(" / " + this.maxBites))
+                .append(Text.literal(" / " + maxUses))
                 .formatted(Formatting.GRAY));
-
-        // Дополнительная пасхалка, если остался последний укус
-        if (remainingUses == 1) {
-            tooltip.add(Text.literal("Осторожно, осталась только горбушка!").formatted(Formatting.RED, Formatting.ITALIC));
-        }
 
         super.appendTooltip(stack, world, tooltip, context);
     }

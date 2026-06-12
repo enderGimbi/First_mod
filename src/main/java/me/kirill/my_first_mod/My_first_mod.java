@@ -7,5 +7,6 @@ public class My_first_mod implements ModInitializer {
     @Override
     public void onInitialize() {
         ModItems.registerModItems();
+        ModPotions.registerModPotions();
     }
 }

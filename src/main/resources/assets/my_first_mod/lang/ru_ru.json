@@ -1,4 +1,9 @@
 {
   "item.my_first_mod.super_bread": "Супер хлебушек",
-  "item.my_first_mod.burned_super_bread": "Сгоревший супер хлебушек"
+  "item.my_first_mod.burned_super_bread": "Сгоревший супер хлебушек",
+  "item.minecraft.potion.effect.hunger_potion": "Зелье голода",
+  "item.minecraft.splash_potion.effect.hunger_potion": "Взрывное зелье голода",
+  "item.minecraft.lingering_potion.effect.hunger_potion": "Туменное зелье голода",
+  "item.minecraft.tipped_arrow.effect.hunger_potion": "Стрела голода",
+  "potion.potency.255": "уровня ЩАС ТЕБЯ СОЖРУ"
 }
