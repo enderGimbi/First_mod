@@ -9,5 +9,7 @@ public class My_first_mod implements ModInitializer {
         ModItems.registerModItems();
         ModPotions.registerModPotions();
         ModPotions.registerPotionRecipes();
+        ModBlocks.registerModBlocks();
+        ModItemGroups.registerItemGroups();
     }
 }

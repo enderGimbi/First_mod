@@ -1,0 +1,5 @@
+{
+  "variants": {
+    "": { "model": "my_first_mod:block/bread_box" }
+  }
+}

@@ -5,5 +5,7 @@
   "item.minecraft.splash_potion.effect.hunger_potion": "Взрывное зелье голода",
   "item.minecraft.lingering_potion.effect.hunger_potion": "Туменное зелье голода",
   "item.minecraft.tipped_arrow.effect.hunger_potion": "Стрела голода",
-  "potion.potency.255": "уровня ЩАС ТЕБЯ СОЖРУ"
+  "potion.potency.255": "уровня ЩАС ТЕБЯ СОЖРУ",
+  "block.my_first_mod.bread_box": "Ящик хлеба",
+  "itemGroup.my_mod_group":"Наш мод"
 }
