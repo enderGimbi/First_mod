@@ -35,7 +35,8 @@ public class ModItems {
             .food(new FoodComponent.Builder()
                     .hunger(-1)
                     .saturationModifier(0)
-                    .statusEffect(new StatusEffectInstance(StatusEffects.HUNGER,200,1),1.0f)
+                    .statusEffect(new StatusEffectInstance(StatusEffects.HUNGER, 200, 1), 1.0f)
+                    .statusEffect(new StatusEffectInstance(StatusEffects.NAUSEA,100,1),1.0f)
                     .build()
             )
     );
