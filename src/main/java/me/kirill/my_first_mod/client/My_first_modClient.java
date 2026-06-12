@@ -22,37 +22,57 @@ public class My_first_modClient implements ClientModInitializer {
                         return 0.0f;
                     }
 
-                    float currentStage = 0.0f; // Стадия поедания (в обратном порядке)
-
-                    int damage = stack.getOrCreateNbt().getInt("Bites");
+                    float[] stages = {0.0f,0.125f,0.25f,0.375f,0.5f,0.625f,0.75f}; // Стадии поедания
+                    int damage = stack.getDamage();
 
 
                     if (entity.isUsingItem() && entity.getActiveItem() == stack) {
                         int timeLeft = entity.getItemUseTimeLeft();
 
-                        if (timeLeft <= 2) {
-                            return 0.750f; // Остаток
-                        } else if (timeLeft <= 8) {
-                            return 0.625f;
-                        } else if (timeLeft <= 12) {
-                            return 0.5f;
-                        } else if (timeLeft <= 18) {
-                            return 0.375f;
-                        } else if (timeLeft <= 22) {
-                            return 0.25f;
-                        } else if (timeLeft <= 28) {
-                            return 0.125f;
-                        } else {
-                            return 0.0f; // Целый
+                        switch (damage){
+                            case 0:
+                                if (timeLeft <= 2)
+                                    return stages[6];
+                                if (timeLeft <= 8)
+                                        return stages[5];
+                                if (timeLeft <= 12)
+                                    return stages[4];
+                                if (timeLeft <= 18)
+                                    return stages[3];
+                                if (timeLeft <= 22)
+                                    return stages[2];
+                                if (timeLeft <= 28)
+                                    return stages[1];
+                                return stages[0];
+                            case 1:
+                                if(timeLeft<=8)
+                                    return stages[6];
+                                if(timeLeft<=14)
+                                    return stages[5];
+                                if(timeLeft<=20)
+                                    return stages[4];
+                                if(timeLeft<=26)
+                                    return stages[3];
+                                return stages[2];
+                            case 2:
+                                if(timeLeft<=12)
+                                    return stages[6];
+                                if(timeLeft<=22)
+                                    return stages[5];
+                                return stages[4];
+                            default:
+                                break;
                         }
+
+
                     }
 
                     if (damage == 1) {
-                        return 0.25f;
+                        return stages[2];
                     } else if (damage >= 2) {
-                        return 0.5f;
+                        return stages[4];
                     }
-                    return currentStage;
+                    return stages[0];
                 }
 
         );

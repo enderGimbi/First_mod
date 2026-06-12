@@ -11,5 +11,6 @@ public class My_first_mod implements ModInitializer {
         ModPotions.registerPotionRecipes();
         ModBlocks.registerModBlocks();
         ModItemGroups.registerItemGroups();
+        ModItems.registerAttackEvents();
     }
 }

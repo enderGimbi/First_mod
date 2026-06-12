@@ -36,7 +36,7 @@
     },
     {
       "predicate": {
-        "my_first_mod:eating_stage": 0.750
+        "my_first_mod:eating_stage": 0.75
       },
       "model": "my_first_mod:item/super_bread_postcrust"
     }
