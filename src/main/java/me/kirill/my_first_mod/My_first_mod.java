@@ -8,5 +8,6 @@ public class My_first_mod implements ModInitializer {
     public void onInitialize() {
         ModItems.registerModItems();
         ModPotions.registerModPotions();
+        ModPotions.registerPotionRecipes();
     }
 }
