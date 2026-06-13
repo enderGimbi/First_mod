@@ -1,0 +1,45 @@
+{
+  "display": {
+    "icon": {
+      "item": "my_first_mod:burned_super_bread"
+    },
+    "title": {
+      "text": "Зачем? х2"
+    },
+    "description": {
+      "text": "Ударить сгоревшим хлебом... КТО ТЫ"
+    },
+    "frame": "task",
+    "show_toast": true,
+    "announce_to_chat": true,
+    "hidden": false
+  },
+  "parent": "my_first_mod:get_burnt_bread",
+  "criteria": {
+    "hit_entity_with_bread": {
+      "trigger": "minecraft:player_hurt_entity",
+      "conditions": {
+        "player": [
+          {
+            "condition": "minecraft:entity_properties",
+            "entity": "this",
+            "predicate": {
+              "equipment": {
+                "mainhand": {
+                  "items": [
+                    "my_first_mod:burned_super_bread"
+                  ]
+                }
+              }
+            }
+          }
+        ]
+      }
+    }
+  },
+  "requirements": [
+    [
+      "hit_entity_with_bread"
+    ]
+  ]
+}
