@@ -20,6 +20,7 @@ public class ModItemGroups {
                         entries.add(ModBlocks.ANTI_SAND);
                         entries.add(ModItems.SUPER_BREAD);
                         entries.add(ModItems.BURNED_SUPER_BREAD);
+                        entries.add(ModItems.GLAUNCHER);
                     })
                     .build());
 

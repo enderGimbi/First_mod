@@ -13,13 +13,8 @@ public class My_first_modClient implements ClientModInitializer {
 
     @Override
     public void onInitializeClient() {
+        // Для отображения антипеска
         EntityRendererRegistry.register(ModEntities.ANTI_SAND_TYPE, AntiSandRenderer::new);
-//        // Избавляемся от дженериков полностью, переводя объекты в "сырой" вид
-//        EntityType rawType = ModEntities.ANTI_SAND_TYPE;
-//        EntityRendererFactory rawFactory = context -> new AntiSandEntityRenderer(context);
-//
-//        // Теперь у Java нет аргументов: на вход поданы чистые базовые классы без условий
-//        EntityRendererRegistry.register(rawType, rawFactory);
 
         ModelPredicateProviderRegistry.register(
                 ModItems.SUPER_BREAD,

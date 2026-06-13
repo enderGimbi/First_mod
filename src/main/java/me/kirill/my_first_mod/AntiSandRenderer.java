@@ -22,7 +22,7 @@ public class AntiSandRenderer extends EntityRenderer<AntiSandEntity> {
 
     @Override
     public void render(AntiSandEntity entity, float yaw, float tickDelta, MatrixStack matrices, VertexConsumerProvider vertexConsumers, int light) {
-        // Рендерер вызывает метод getBlockState() из класса AntiSandEntity выше!
+        // Рендерер вызывает метод getBlockState() из класса AntiSandEntity
         BlockState blockState = entity.getBlockState();
 
         if (blockState == null) return;

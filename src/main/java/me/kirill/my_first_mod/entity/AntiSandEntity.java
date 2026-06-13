@@ -22,7 +22,7 @@ public class AntiSandEntity extends Entity {
         super(type, world);
     }
 
-    // Второй конструктор для твоего спавна (5 параметров)
+    // Второй конструктор (5 параметров)
     public AntiSandEntity(World world, double x, double y, double z, BlockState state) {
         super(ModEntities.ANTI_SAND_TYPE, world);
         this.myBlockState = state; // Записываем переданный блок в переменную
@@ -37,17 +37,17 @@ public class AntiSandEntity extends Entity {
     public void tick() {
         super.tick();
 
-        // 1. Применяем скорость движения (взлетаем вверх по оси Y)
+        // Применяем скорость движения (взлетаем вверх по оси Y)
         // 0.04 — это скорость подъема. Можешь сделать больше или меньше
         this.setVelocity(this.getVelocity().add(0, 0.04, 0));
 
-        // 2. Двигаем сущность с учетом её скорости и обрабатываем столкновения
+        // Двигаем сущность с учетом её скорости и обрабатываем столкновения
         this.move(net.minecraft.entity.MovementType.SELF, this.getVelocity());
 
-        // 3. Небольшое сопротивление воздуха, чтобы скорость не росла до бесконечности
+        // Небольшое сопротивление воздуха, чтобы скорость не росла до бесконечности
         this.setVelocity(this.getVelocity().multiply(0.98));
 
-        // 4. ЕСЛИ ОН ВРЕЗАЛСЯ В ПОТОЛОК: Превращаем его обратно в твердый блок
+        // Превращаем его обратно в твердый блок при столкновении
         if (this.horizontalCollision || this.verticalCollision) {
             net.minecraft.util.math.BlockPos pos = this.getBlockPos();
 

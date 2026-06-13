@@ -23,28 +23,26 @@ public class AntiSandBlock extends Block {
         world.scheduleBlockTick(pos, this, 2); // Заводим таймер проверки на через 2 тика
     }
 
-    // Срабатывает, если обновились соседи (например, сломали блок СВЕРХУ)
+    // Срабатывает, если обновились соседи (например, сломали блок сверху)
     @Override
     public BlockState getStateForNeighborUpdate(BlockState state, Direction direction, BlockState neighborState, WorldAccess world, BlockPos pos, BlockPos neighborPos) {
         world.scheduleBlockTick(pos, this, 2);
         return super.getStateForNeighborUpdate(state, direction, neighborState, world, pos, neighborPos);
     }
 
-    // Сам тик, где происходит магия превращения блока в сущность
+    // Сам тик, где происходит превращение блока в сущность
     @Override
     public void scheduledTick(BlockState state, ServerWorld world, BlockPos pos, Random random) {
-        // Проверяем: если СВЕРХУ воздух/жидкость И мы не на самом краю неба
+        // Проверяем: если сверху воздух/жидкость и мы не на самом краю неба
         if (canFallUp(world.getBlockState(pos.up())) && pos.getY() < world.getTopY()) {
             // Создаем нашу кастомную сущность (смещение на +0.5 нужно для центровки по блоку)
-
-
             BlockState state1 = ModBlocks.ANTI_SAND.getDefaultState();
             AntiSandEntity entity = new AntiSandEntity(world, (double)pos.getX() + 0.5, (double)pos.getY(), (double)pos.getZ() + 0.5, state1);
 
             // Превращаем блок в мире в воздух
             world.setBlockState(pos, Blocks.AIR.getDefaultState(), 3);
 
-            // Спавним сущность лететь в мир
+            // Спавним сущность лететь вверх
             world.spawnEntity(entity);
         }
     }

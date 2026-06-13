@@ -1,6 +1,7 @@
 package me.kirill.my_first_mod;
 
 import net.fabricmc.fabric.api.event.player.AttackEntityCallback;
+import net.fabricmc.fabric.api.item.v1.FabricItemSettings;
 import net.fabricmc.fabric.api.itemgroup.v1.ItemGroupEvents;
 import net.minecraft.entity.effect.StatusEffectInstance;
 import net.minecraft.entity.effect.StatusEffects;
@@ -11,6 +12,7 @@ import net.minecraft.registry.Registry;
 import net.minecraft.util.ActionResult;
 import net.minecraft.util.Hand;
 import net.minecraft.util.Identifier;
+import net.minecraft.util.Rarity;
 
 public class ModItems {
 
@@ -88,10 +90,15 @@ public class ModItems {
         });
     }
 
+    public static final Item GLAUNCHER = new GLauncher(new Item.Settings()
+            .maxDamage(200)
+            .rarity(Rarity.UNCOMMON));
+
     public static void registerModItems() {
         // Регистрация предметов в игре
         Registry.register(Registries.ITEM, new Identifier("my_first_mod", "super_bread"), SUPER_BREAD);
         Registry.register(Registries.ITEM, new Identifier("my_first_mod", "burned_super_bread"), BURNED_SUPER_BREAD);
+        Registry.register(Registries.ITEM,new Identifier("my_first_mod","glauncher"),GLAUNCHER);
 
         // Добавление во вкладку еды
         ItemGroupEvents.modifyEntriesEvent(ItemGroups.FOOD_AND_DRINK).register(content -> {
