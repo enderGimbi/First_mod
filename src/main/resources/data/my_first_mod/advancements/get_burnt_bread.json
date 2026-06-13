@@ -7,7 +7,7 @@
       "text": "Ну и зачем?"
     },
     "description": {
-      "text": "Сжечь супер хлебушек"
+      "text": "Сжечь супер хлебушек в плавильне"
     },
     "frame": "task",
     "show_toast": true,
@@ -16,22 +16,16 @@
   },
   "parent": "my_first_mod:root",
   "criteria": {
-    "has_burned_super_bread": {
-      "trigger": "minecraft:inventory_changed",
+    "smelted_burned_super_bread": {
+      "trigger": "minecraft:recipe_crafted",
       "conditions": {
-        "items": [
-          {
-            "items": [
-              "my_first_mod:burned_super_bread"
-            ]
-          }
-        ]
+        "recipe_id": "my_first_mod:burn_super_bread"
       }
     }
   },
   "requirements": [
     [
-      "has_burned_super_bread"
+      "smelted_burned_super_bread"
     ]
   ]
 }
