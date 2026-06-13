@@ -1,0 +1,28 @@
+{
+  "display": {
+    "icon": {
+      "item": "my_first_mod:super_bread"
+    },
+    "title": {
+      "text": "Наш мод"
+    },
+    "description": {
+      "text": "Осовение искусства моддинга"
+    },
+    "background": "minecraft:textures/block/nether_bricks.png",
+    "frame": "task",
+    "show_toast": false,
+    "announce_to_chat": false,
+    "hidden": false
+  },
+  "criteria": {
+    "tick": {
+      "trigger": "minecraft:tick"
+    }
+  },
+  "requirements": [
+    [
+      "tick"
+    ]
+  ]
+}

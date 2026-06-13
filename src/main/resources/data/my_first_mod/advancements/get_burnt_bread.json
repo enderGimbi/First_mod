@@ -1,0 +1,37 @@
+{
+  "display": {
+    "icon": {
+      "item": "my_first_mod:burned_super_bread"
+    },
+    "title": {
+      "text": "Ну и зачем?"
+    },
+    "description": {
+      "text": "Сжечь супер хлебушек"
+    },
+    "frame": "task",
+    "show_toast": true,
+    "announce_to_chat": true,
+    "hidden": true
+  },
+  "parent": "my_first_mod:root",
+  "criteria": {
+    "has_burned_super_bread": {
+      "trigger": "minecraft:inventory_changed",
+      "conditions": {
+        "items": [
+          {
+            "items": [
+              "my_first_mod:burned_super_bread"
+            ]
+          }
+        ]
+      }
+    }
+  },
+  "requirements": [
+    [
+      "has_burned_super_bread"
+    ]
+  ]
+}
