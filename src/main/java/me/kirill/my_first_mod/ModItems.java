@@ -5,6 +5,7 @@ import net.fabricmc.fabric.api.itemgroup.v1.ItemGroupEvents;
 import net.minecraft.entity.effect.StatusEffectInstance;
 import net.minecraft.entity.effect.StatusEffects;
 import net.minecraft.item.*;
+import net.minecraft.particle.ParticleTypes;
 import net.minecraft.registry.Registries;
 import net.minecraft.registry.Registry;
 import net.minecraft.util.ActionResult;
@@ -44,16 +45,42 @@ public class ModItems {
 
                 // Проверяем на хлеб
                 if (stack.isOf(BURNED_SUPER_BREAD)) {
+                    float breadDamage = 3.0f;
+                    boolean isCritical = player.fallDistance > 0.0f
+                            && !player.isClimbing()
+                            && !player.isSwimming()
+                            && !player.isTouchingWater();
+
+                    if(isCritical){
+                        breadDamage *= 1.5f;
+
+                        if(world instanceof net.minecraft.server.world.ServerWorld serverWorld){
+                            serverWorld.spawnParticles(
+                                    ParticleTypes.CRIT,
+                                    entity.getX(),
+                                    entity.getBodyY(0.5), // Для нахождения середины тела (0 - ноги, 1 - голова)
+                                    entity.getZ(),
+                                    15,
+                                    0.2,0.2,0.2, // Настройка разлета
+                                    0.1
+                            );
+
+                        }
+                    }
+
 
                     // Наносим урон каменного меча
-                    entity.damage(world.getDamageSources().playerAttack(player), 4.0F);
+                    entity.damage(world.getDamageSources().playerAttack(player), breadDamage);
 
                     // Тратим 1 единицу прочности хлеба при ударе
                     stack.damage(1, player, (p) -> p.sendToolBreakStatus(hand));
 
                     // Произойдет наше событие доп урона
-                    return ActionResult.SUCCESS;
+                    return ActionResult.PASS;
                     // существует также FAIL для отмены любого действия
+                    // для завершения цикла проверок колбеков от модов используется SUCCESS
+                    // потому нужно правильно выбрать между SUCCESS и PASS, так как
+                    // при PASS майн добавит свои базовые 1.0F урона
                 }
             }
             // Произойдет ванильное событие (без вмешательства кода выше)
