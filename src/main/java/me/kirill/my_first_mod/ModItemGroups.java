@@ -17,8 +17,9 @@ public class ModItemGroups {
                     .entries((displayContext, entries) -> {
                         // Предметы во вкладке
                         entries.add(ModBlocks.BREAD_BOX);
-                        entries.add(ModItems.BURNED_SUPER_BREAD);
+                        entries.add(ModBlocks.ANTI_SAND);
                         entries.add(ModItems.SUPER_BREAD);
+                        entries.add(ModItems.BURNED_SUPER_BREAD);
                     })
                     .build());
 

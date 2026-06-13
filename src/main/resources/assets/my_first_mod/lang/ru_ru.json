@@ -7,5 +7,6 @@
   "item.minecraft.tipped_arrow.effect.hunger_potion": "Стрела голода",
   "potion.potency.255": "уровня ЩАС ТЕБЯ СОЖРУ",
   "block.my_first_mod.bread_box": "Ящик хлеба",
+  "block.my_first_mod.anti_sand": "Анти песок",
   "itemGroup.my_mod_group":"Наш мод"
 }
