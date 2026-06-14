@@ -1,4 +1,4 @@
-package me.kirill.my_first_mod; // Твой пакет
+package me.kirill.my_first_mod.item; // Твой пакет
 
 import net.minecraft.client.item.TooltipContext;
 import net.minecraft.entity.LivingEntity;

@@ -1,4 +1,4 @@
-package me.kirill.my_first_mod;
+package me.kirill.my_first_mod.item;
 
 import net.minecraft.entity.TntEntity;
 import net.minecraft.entity.player.PlayerEntity;
@@ -29,7 +29,7 @@ public class GLauncher extends Item {
 
             // если заряжен, то стреляем
             stack.damage(1,user,player -> {});
-            user.getItemCooldownManager().set(this,100);
+            user.getItemCooldownManager().set(this,10);
 
             // на стороне сервера
             if(!world.isClient()){
@@ -41,7 +41,7 @@ public class GLauncher extends Item {
         }
         else{
             if(canReaload(user)){
-                user.getItemCooldownManager().set(this,100);
+                user.getItemCooldownManager().set(this,10);
                 if(!world.isClient()){
                     reload(user, nbt);
                 }

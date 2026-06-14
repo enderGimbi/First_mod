@@ -21,6 +21,7 @@ public class ModItemGroups {
                         entries.add(ModItems.SUPER_BREAD);
                         entries.add(ModItems.BURNED_SUPER_BREAD);
                         entries.add(ModItems.GLAUNCHER);
+                        entries.add(ModItems.GLAUNCHER_V2);
                     })
                     .build());
 
