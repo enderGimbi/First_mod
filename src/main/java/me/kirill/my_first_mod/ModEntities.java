@@ -20,12 +20,14 @@ public class ModEntities {
                     .build() // Обязательный метод build() для Fabric!
     );
 
-    public static final EntityType<GrenadeEntity> GRANADE_TYPE = Registry.register(
+    public static final EntityType<GrenadeEntity> GRENADE_TYPE = Registry.register(
             Registries.ENTITY_TYPE,
-            new Identifier("my_first_mod", "granade_entity"),
-            EntityType.Builder.<GrenadeEntity>create(GrenadeEntity::new, SpawnGroup.MISC)
-                    .setDimensions(0.98f, 0.98f)
-                    .build("")
+            new Identifier("my_first_mod", "grenade_entity"),
+            FabricEntityTypeBuilder.<GrenadeEntity>create(SpawnGroup.MISC,GrenadeEntity::new)
+                    .trackRangeBlocks(64)
+                    .trackedUpdateRate(1)
+                    .dimensions(EntityDimensions.fixed(0.98f, 0.98f))
+                    .build()
     );
 
     public static void registerModEntities() {

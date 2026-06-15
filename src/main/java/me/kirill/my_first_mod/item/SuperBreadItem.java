@@ -18,21 +18,17 @@ public class SuperBreadItem extends Item {
         super(settings);
     }
 
-    /**
+    /*
      * Для реализации правильной логики многоразового хлеба для него, в обход стандартным функциям, написана
      * своя логика поедания (при желании, Вова, можешь прикрутить тут свои звуки или же сменить координаты
      * воспроизводимого звука)
-     * @param stack
-     * @param world
-     * @param user
-     * @return {@code stack}
      */
     @Override
     public ItemStack finishUsing(ItemStack stack, World world, LivingEntity user) {
         // Проверяем, является ли предмет едой (наш хлеб является)
         if (this.isFood()) {
 
-            /**
+            /*
              * Вместо использования {@code "user.eatFood(world,stack)"}
              * сами пишем что будет происходить с предметом, а также с игроком
              *

@@ -15,16 +15,19 @@ public class Glauncher_v2 extends GLauncher{
 
     @Override
     public void shot(World world, PlayerEntity player){
-        GrenadeEntity grenade = new GrenadeEntity(ModEntities.GRANADE_TYPE,player,world);
-        grenade.setVelocity(player,player.getPitch(),player.getYaw(),0.0f,1.0f,0.1f);
-        world.playSound(
-                null,
-                player.getBlockPos(),
-                SoundEvents.ENTITY_WITHER_SHOOT,
-                SoundCategory.PLAYERS,
-                1.0f,
-                0.4f);
-        world.spawnEntity(grenade);
+        if(!world.isClient()){
+            GrenadeEntity grenade = new GrenadeEntity(world, player);
+            grenade.setOwner(player);
+            grenade.setVelocity(player, player.getPitch(), player.getYaw(), 0.0f, 1.0f, 0.1f);
+            world.playSound(
+                    null,
+                    player.getBlockPos(),
+                    SoundEvents.ENTITY_WITHER_SHOOT,
+                    SoundCategory.PLAYERS,
+                    1.0f,
+                    0.4f);
+            world.spawnEntity(grenade);
+        }
     }
 
 }
