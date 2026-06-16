@@ -15,6 +15,9 @@
     ],
     "main": [
       "me.kirill.my_first_mod.My_first_mod"
+    ],
+    "modmenu": [
+      "me.kirill.my_first_mod.client.ModMenuIntegration"
     ]
   },
   "mixins": [

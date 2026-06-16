@@ -1,6 +1,6 @@
 package me.kirill.my_first_mod.client;
 
-import me.kirill.my_first_mod.AntiSandRenderer;
+import me.kirill.my_first_mod.render.AntiSandRenderer;
 import me.kirill.my_first_mod.ModEntities;
 import me.kirill.my_first_mod.ModItems;
 import net.fabricmc.api.ClientModInitializer;

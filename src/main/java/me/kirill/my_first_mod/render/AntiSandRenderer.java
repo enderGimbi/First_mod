@@ -1,4 +1,4 @@
-package me.kirill.my_first_mod;
+package me.kirill.my_first_mod.render;
 
 import me.kirill.my_first_mod.entity.AntiSandEntity;
 import net.minecraft.block.BlockState;
