@@ -48,5 +48,6 @@ public class My_first_mod implements ModInitializer {
                 ModEntities.GRENADE_TYPE,
                 GrenadeEntityRenderer::new
         );
+        ModPackets.registerC2SPackets();
     }
 }

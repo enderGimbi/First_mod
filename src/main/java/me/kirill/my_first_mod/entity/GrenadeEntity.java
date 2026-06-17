@@ -2,7 +2,6 @@ package me.kirill.my_first_mod.entity;
 
 import me.kirill.my_first_mod.ModEntities;
 import me.kirill.my_first_mod.My_first_mod;
-import me.kirill.my_first_mod.cfg.Glauncher_v2_CFG;
 import me.kirill.my_first_mod.util.IPlayerBazookaSettings;
 import net.minecraft.entity.*;
 import net.minecraft.entity.data.DataTracker;
@@ -34,7 +33,7 @@ public class GrenadeEntity extends ThrownItemEntity {
     // Главный конструктор, который Майнкрафт вызывает автоматически (при спавне, чтении из мира и т.д.)
     public GrenadeEntity(EntityType<GrenadeEntity> entityType, World world) {
         super(entityType, world);
-        // Загружаем значения по умолчанию из конфига, чтобы они никогда не были равны 0
+        // Загружаем значения по умолчанию из конфига в обычные переменные
         this.explosionPower = My_first_mod.config.explosionPower;
         this.fuseTicks = My_first_mod.config.fuseDelayTicks;
         this.shootVelocity = My_first_mod.config.shootVelocity;
@@ -46,36 +45,54 @@ public class GrenadeEntity extends ThrownItemEntity {
         super(ModEntities.GRENADE_TYPE, owner, world);
         if (owner != null) {
             this.ownerUuid = owner.getUuid();
+
+            if (owner instanceof IPlayerBazookaSettings settings) {
+                // Обновляем локальные переменные
+                this.explosionPower = settings.getExplosionPower();
+                this.fuseTicks = settings.getFuseDelay();
+                this.shootVelocity = settings.getShootVelocity();
+                this.soundVolume = settings.getSoundVolume();
+
+                // ЖЕЛЕЗНО обновляем сетевой DataTracker, чтобы метод взрыва увидел изменения!
+                this.setExplosionPower(settings.getExplosionPower());
+                this.setFuseTicks(settings.getFuseDelay());
+            }
         }
-        IPlayerBazookaSettings settings = (IPlayerBazookaSettings) owner;
-        this.explosionPower = settings.getExplosionPower();
-        this.fuseTicks = settings.getFuseDelay();
-        this.shootVelocity = settings.getShootVelocity();
-        this.soundVolume = settings.getSoundVolume();
     }
 
     @SuppressWarnings("ConstantValue")
     public GrenadeEntity(EntityType<? extends ThrownItemEntity> entityType, LivingEntity livingEntity, World world) {
         super(entityType, livingEntity, world);
-        IPlayerBazookaSettings settings = null;
         if (livingEntity != null) {
             this.ownerUuid = livingEntity.getUuid();
-            settings = (IPlayerBazookaSettings) livingEntity;
+
+            if (livingEntity instanceof IPlayerBazookaSettings settings) {
+                this.explosionPower = settings.getExplosionPower();
+                this.fuseTicks = settings.getFuseDelay();
+                this.shootVelocity = settings.getShootVelocity();
+                this.soundVolume = settings.getSoundVolume();
+
+                // Точно так же пушим данные в трекер
+                this.setExplosionPower(settings.getExplosionPower());
+                this.setFuseTicks(settings.getFuseDelay());
+            }
         }
-        this.ownerUuid = livingEntity != null ? livingEntity.getUuid() : null;
-        this.explosionPower = settings.getExplosionPower();
-        this.fuseTicks = settings.getFuseDelay();
-        this.shootVelocity = settings.getShootVelocity();
-        this.soundVolume = settings.getSoundVolume();
     }
 
     public GrenadeEntity(EntityType<? extends ThrownItemEntity> type, World world, LivingEntity owner,
                          float power, int delay, float velocity, float volume) {
         super(type, owner, world);
-        this.setExplosionPower(power);
-        this.setFuseTicks(delay);
+        if (owner != null) {
+            this.ownerUuid = owner.getUuid();
+        }
+        this.explosionPower = power;
+        this.fuseTicks = delay;
         this.shootVelocity = velocity;
         this.soundVolume = volume;
+
+        // Передаем кастомные значения в сетевой трекер
+        this.setExplosionPower(power);
+        this.setFuseTicks(delay);
     }
 
     @Override

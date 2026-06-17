@@ -1,10 +1,18 @@
 package me.kirill.my_first_mod.client;
 
+import me.kirill.my_first_mod.item.Glauncher_v2;
 import me.kirill.my_first_mod.render.AntiSandRenderer;
 import me.kirill.my_first_mod.ModEntities;
 import me.kirill.my_first_mod.ModItems;
+import me.kirill.my_first_mod.util.IPlayerBazookaSettings;
 import net.fabricmc.api.ClientModInitializer;
+import net.fabricmc.fabric.api.client.rendering.v1.HudRenderCallback;
+import net.minecraft.client.MinecraftClient;
+import net.minecraft.client.font.TextRenderer;
+import net.minecraft.client.gui.DrawContext;
 import net.minecraft.client.item.ModelPredicateProviderRegistry;
+import net.minecraft.entity.player.PlayerEntity;
+import net.minecraft.util.Hand;
 import net.minecraft.util.Identifier;
 import net.fabricmc.fabric.api.client.rendering.v1.EntityRendererRegistry;
 
@@ -15,6 +23,19 @@ public class My_first_modClient implements ClientModInitializer {
     public void onInitializeClient() {
         // Для отображения антипеска
         EntityRendererRegistry.register(ModEntities.ANTI_SAND_TYPE, AntiSandRenderer::new);
+
+        HudRenderCallback.EVENT.register((drawContext, tickDelta) -> {
+            MinecraftClient client = MinecraftClient.getInstance();
+            PlayerEntity player = client.player;
+
+            // Если игрока нет или открыто какое-то меню (инвентарь, пауза) — ничего не рисуем
+            if (player == null || client.currentScreen != null) return;
+
+            // Проверяем, держит ли игрок НАШУ базуку в главной руке
+            if (player.getStackInHand(Hand.MAIN_HAND).getItem() instanceof Glauncher_v2) {
+                renderBazookaHUD(drawContext, client, player);
+            }
+        });
 
         ModelPredicateProviderRegistry.register(
                 ModItems.SUPER_BREAD,
@@ -78,5 +99,35 @@ public class My_first_modClient implements ClientModInitializer {
                 }
 
         );
+    }
+
+    private void renderBazookaHUD(DrawContext drawContext, MinecraftClient client, PlayerEntity player) {
+        TextRenderer textRenderer = client.textRenderer;
+
+        // Получаем динамический размер окна (благодаря этому текст масштабируется вместе с GUI Майнкрафта)
+        int screenWidth = client.getWindow().getScaledWidth();
+        int screenHeight = client.getWindow().getScaledHeight();
+
+        if (player instanceof IPlayerBazookaSettings settings) {
+            float power = settings.getExplosionPower();
+            int delay = settings.getFuseDelay();
+            float velocity = settings.getShootVelocity();
+
+            // Высчитываем координаты относительно ХОТБАРА:
+            // centerX - 91 — это левая граница хотбара. Сдвигаем левее, например до -160.
+            int x = (screenWidth / 2) - 185;
+
+            // screenHeight - 22 — это примерно уровень иконок хотбара по высоте.
+            // Поднимаем каждую строчку повыше, чтобы они шли снизу вверх аккуратным столбиком.
+            int yBase = screenHeight - 10;
+
+            // Сдержанный белый цвет текста
+            int textColor = 0xFFFFFF;
+
+            // Отрисовка мелкого аккуратного текста (true включает стандартную ванильную тень блока текста)
+            drawContext.drawText(textRenderer, "Сила: " + power, x, yBase - 24, textColor, true);
+            drawContext.drawText(textRenderer, "Задержка: " + delay + "т", x, yBase - 12, textColor, true);
+            drawContext.drawText(textRenderer, "Нач. скорость: " + velocity, x, yBase, textColor, true);
+        }
     }
 }
