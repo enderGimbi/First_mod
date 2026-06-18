@@ -141,7 +141,24 @@ public class GrenadeEntity extends ThrownItemEntity implements GeoEntity {
             this.setVelocity(0.0, 0.0, 0.0);
         } else {
             if (!this.getWorld().isClient) {
+                // 1. Сохраняем реальную скорость гранаты
+                net.minecraft.util.math.Vec3d actualVelocity = this.getVelocity();
+
+                // 2. Получаем вектор направления полёта (нормализованный, длиной 1.0 блок)
+                net.minecraft.util.math.Vec3d lookVector = this.getRotationVector().normalize();
+
+                // 3. Виртуальная скорость для проверки: реальный шаг + 1.0 блок длины снаряда вперед
+                net.minecraft.util.math.Vec3d checkVelocity = actualVelocity.add(lookVector);
+
+                // Временно устанавливаем увеличенную скорость, чтобы ванильный луч проверил коллизию с учётом длины
+                this.setVelocity(checkVelocity);
+
+                // 4. Вызываем ванильный поиск столкновений (теперь он ищет на 1 блок дальше, учитывая нос гранаты)
                 HitResult hitResult = ProjectileUtil.getCollision(this, this::canHit);
+
+                // Возвращаем реальную физическую скорость обратно, чтобы граната не ускорялась в воздухе
+                this.setVelocity(actualVelocity);
+
                 if (hitResult.getType() != HitResult.Type.MISS) {
                     this.onCollision(hitResult);
                 }
@@ -354,5 +371,10 @@ public class GrenadeEntity extends ThrownItemEntity implements GeoEntity {
 
     public void setFuseTicks(int ticks) {
         this.dataTracker.set(FUSE_TICKS, ticks);
+    }
+
+    @Override
+    public EntityDimensions getDimensions(EntityPose pose){
+        return EntityDimensions.changing(0.375f,0.375f);
     }
 }

@@ -26,7 +26,7 @@ public class ModEntities {
             FabricEntityTypeBuilder.<GrenadeEntity>create(SpawnGroup.MISC,GrenadeEntity::new)
                     .trackRangeBlocks(64)
                     .trackedUpdateRate(1)
-                    .dimensions(EntityDimensions.fixed(0.98f, 0.98f))
+                    .dimensions(EntityDimensions.fixed(0.375f, 0.375f))
                     .build()
     );
 
