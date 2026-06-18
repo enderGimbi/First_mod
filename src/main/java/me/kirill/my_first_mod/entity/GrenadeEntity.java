@@ -3,6 +3,7 @@ package me.kirill.my_first_mod.entity;
 import me.kirill.my_first_mod.ModEntities;
 import me.kirill.my_first_mod.My_first_mod;
 import me.kirill.my_first_mod.util.IPlayerBazookaSettings;
+import net.minecraft.block.BlockState;
 import net.minecraft.entity.*;
 import net.minecraft.entity.data.DataTracker;
 import net.minecraft.entity.data.TrackedData;
@@ -14,7 +15,12 @@ import net.minecraft.item.Items;
 import net.minecraft.network.listener.ClientPlayPacketListener;
 import net.minecraft.network.packet.Packet;
 import net.minecraft.network.packet.s2c.play.EntitySpawnS2CPacket;
+import net.minecraft.particle.ParticleTypes;
+import net.minecraft.server.world.ServerWorld;
+import net.minecraft.sound.SoundCategory;
+import net.minecraft.sound.SoundEvents;
 import net.minecraft.util.hit.HitResult;
+import net.minecraft.util.math.BlockPos;
 import net.minecraft.world.World;
 import software.bernie.geckolib.animatable.GeoEntity;
 import software.bernie.geckolib.core.animatable.GeoAnimatable;
@@ -104,6 +110,7 @@ public class GrenadeEntity extends ThrownItemEntity implements GeoEntity {
         }
     }
 
+    @SuppressWarnings("ConstantValue")
     public GrenadeEntity(EntityType<? extends ThrownItemEntity> type, World world, LivingEntity owner,
                          float power, int delay, float velocity, float volume) {
         super(type, owner, world);
@@ -167,7 +174,7 @@ public class GrenadeEntity extends ThrownItemEntity implements GeoEntity {
                     // ParticleTypes.POOF — красивое белое облачко дыма
                     // Если хочешь тонкую светящуюся линию, замени POOF на END_ROD
                     this.getWorld().addParticle(
-                            net.minecraft.particle.ParticleTypes.POOF,
+                            ParticleTypes.CLOUD,
                             x, y, z,
                             0.0, 0.0, 0.0 // Скорость самой частицы (0.0 означает, что она будет висеть на месте, образуя ровный след)
                     );
@@ -203,7 +210,7 @@ public class GrenadeEntity extends ThrownItemEntity implements GeoEntity {
         int centerZ = (int) Math.floor(grenade.getZ());
 
         // =========================================================================
-        // 1. УРОН ПО МОБАМ (Остается O(N) через быстрый хитбокс)
+        // 1. УРОН ПО МОБАМ
         // =========================================================================
         net.minecraft.util.math.Box damageBox = new net.minecraft.util.math.Box(
                 grenade.getX() - radius, grenade.getY() - radius, grenade.getZ() - radius,
@@ -238,12 +245,10 @@ public class GrenadeEntity extends ThrownItemEntity implements GeoEntity {
         }
 
         // =========================================================================
-        // 2. ФАЗА 1: БЫСТРЫЙ СБОР КООРДИНАТ СФЕРЫ В ПАМЯТЬ (Оптимизация в 8 раз!)
+        // 2. ФАЗА 1: БЫСТРЫЙ СБОР КООРДИНАТ СФЕРЫ В ПАМЯТЬ
         // =========================================================================
-        // Используем структуру данных для хранения предрассчитанных относительных координат
         java.util.List<net.minecraft.util.math.BlockPos> TargetPositions = new java.util.ArrayList<>();
 
-        // Перебираем только ОДНУ ЧЕТВЕРТЬ куба (только положительные x, y, z)
         for (int x = 0; x <= radius; x++) {
             int xSq = x * x;
             for (int y = 0; y <= radius; y++) {
@@ -251,9 +256,7 @@ public class GrenadeEntity extends ThrownItemEntity implements GeoEntity {
                 for (int z = 0; z <= radius; z++) {
                     int currentDistanceSq = xSqPlusYSq + (z * z);
 
-                    // Если точка попала в сферу
                     if (currentDistanceSq <= radiusSq) {
-                        // Генерируем зеркальные копии этой точки для всех 8 направлений (симметрия)
                         for (int sx : x == 0 ? new int[]{0} : new int[]{x, -x}) {
                             for (int sy : y == 0 ? new int[]{0} : new int[]{y, -y}) {
                                 for (int sz : z == 0 ? new int[]{0} : new int[]{z, -z}) {
@@ -267,15 +270,11 @@ public class GrenadeEntity extends ThrownItemEntity implements GeoEntity {
         }
 
         // =========================================================================
-        // 3. ФАЗА 2: ВЕКТОРНЫЙ ПРОСЧЕТ ЛУЧЕЙ (Учет преград и экранирования)
+        // 3. ФАЗА 2: ВЕКТОРНЫЙ ПРОСЧЕТ ЛУЧЕЙ (С твоей кастомной функцией затухания)
         // =========================================================================
-        // Перебираем только точки НА ПОВЕРХНОСТИ сферы, чтобы пустить к ним лучи.
-        // Для этого отфильтруем наш список, оставив позиции, которые находятся на краю.
-
         java.util.Set<net.minecraft.util.math.BlockPos> blocksToDestroy = new java.util.HashSet<>();
 
         for (net.minecraft.util.math.BlockPos targetPos : TargetPositions) {
-            // Пускаем луч из центра взрыва (grenade.getPos()) к этой точке
             double dx = targetPos.getX() - centerX;
             double dy = targetPos.getY() - centerY;
             double dz = targetPos.getZ() - centerZ;
@@ -283,51 +282,122 @@ public class GrenadeEntity extends ThrownItemEntity implements GeoEntity {
             double distance = Math.sqrt(dx * dx + dy * dy + dz * dz);
             if (distance == 0) continue;
 
-            // Нормализуем вектор (делаем шаг длиной в 1 блок или меньше)
             double stepX = dx / distance;
             double stepY = dy / distance;
             double stepZ = dz / distance;
 
-            // Начальная сила луча в центре
-            float beamPower = maxPower * (0.7f + world.random.nextFloat() * 0.6f); // Хаос на старте луча
+            // Сила луча в центре взрыва
+            float beamPower = maxPower * (0.7f + world.random.nextFloat() * 0.6f);
 
-            // Шагаем по лучу от центра к финальной точке
-            for (double d = 0; d <= distance; d += 0.5) { // шаг 0.5 для точности, чтобы не пропустить углы блоков
+            for (double d = 0; d <= distance; d += 0.5) {
                 int checkX = (int) Math.floor(centerX + stepX * d);
                 int checkY = (int) Math.floor(centerY + stepY * d);
                 int checkZ = (int) Math.floor(centerZ + stepZ * d);
 
-                net.minecraft.util.math.BlockPos currentPos = new net.minecraft.util.math.BlockPos(checkX, checkY, checkZ);
-                net.minecraft.block.BlockState blockState = world.getBlockState(currentPos);
+                BlockPos currentPos = new net.minecraft.util.math.BlockPos(checkX, checkY, checkZ);
+                BlockState blockState = world.getBlockState(currentPos);
 
                 if (!blockState.isAir()) {
                     float resistance = blockState.getBlock().getBlastResistance();
 
-                    // Ванильное ТНТ делит сопротивление на коэф., сделаем послойное гашение:
-                    // Земля (0.5) почти не задержит луч, а Камень (6.0) отнимет много сил
-                    float resistanceCost = (resistance + 0.3f) * 0.3f;
+                    if (resistance >= 1200.0f) {
+                        break; // Бедрок поглощает луч полностью
+                    }
 
-                    // Вычитаем прочность блока из силы луча
+                    float resistanceCost = (resistance + 0.3f) * 0.3f;
                     beamPower -= resistanceCost;
 
-                    // Если силы луча все еще хватает, чтобы разрушить этот конкретный блок
+                    // Проверяем: жива ли еще сила луча И хватает ли текущей расчетной мощности (из твоей функции),
+                    // чтобы преодолеть сопротивление конкретного блока на этом расстоянии d
                     if (beamPower >= 0 && currentPowerCalculated(maxPower, d, radius) >= resistance) {
                         blocksToDestroy.add(currentPos.toImmutable());
                     } else {
-                        // Луч полностью поглощен препятствием! Дальше за этот блок он пройти не может.
-                        break;
+                        break; // Луч застрял в блоке
                     }
                 }
 
-                // Естественное затухание луча от расстояния (даже в воздухе)
                 beamPower -= 0.1f;
                 if (beamPower <= 0) break;
             }
         }
 
-        // Настоящее разрушение всех блоков, сквозь которые пробились лучи
-        for (net.minecraft.util.math.BlockPos pos : blocksToDestroy) {
-            world.breakBlock(pos, false, grenade);
+        // =========================================================================
+        // 4. ФАЗА 3: ИСПРАВЛЕННОЕ УНИЧТОЖЕНИЕ БЛОКОВ (Без лагов, дропа семян и звуков)
+        // =========================================================================
+        for (BlockPos pos : blocksToDestroy) {
+            if (world.getBlockState(pos).getBlock().getBlastResistance() < 1200.0f) {
+                // Флаги 2 | 16 стирают блок в воздухе, не вызывая триггеры разрушения,
+                // которые заставляли ломаться и выпадать траву, семена и издавать звуки!
+                world.setBlockState(pos, net.minecraft.block.Blocks.AIR.getDefaultState(), 2 | 16);
+            }
+        }
+
+
+        float minPowerRange = 5.0f;
+        float maxPowerRange = 50.0f;
+        float powerRatio = (maxPower-minPowerRange)/(maxPowerRange-minPowerRange);
+        powerRatio = Math.max(0.0f,Math.min(1.0f,powerRatio));
+        float dynamicPitch = 1.0f - (powerRatio*0.5f);
+
+        world.playSound(null,
+                grenade.getBlockPos(),
+                SoundEvents.ENTITY_GENERIC_EXPLODE,
+                SoundCategory.PLAYERS,
+                Math.max(2.0f,2.0f*(explosionPower/3.0f)*soundVolume),
+                dynamicPitch);
+
+
+
+        // =========================================================================
+        // 5. ФАЗА 4: СПАВН ЧАСТИЦ (Ванильные + Кастомные)
+        // =========================================================================
+        if (world instanceof ServerWorld serverWorld) {
+            double pX = grenade.getX();
+            double pY = grenade.getY();
+            double pZ = grenade.getZ();
+
+            // --- ВАНИЛЬНЫЕ ЧАСТИЦЫ ---
+            // 1. Огромное облако взрыва (главный визуальный бабах)
+            serverWorld.spawnParticles(
+                    ParticleTypes.EXPLOSION_EMITTER,
+                    pX, pY, pZ,
+                    1,          // Количество (для EMITTER достаточно 1, она сама по себе большая)
+                    0.0, 0.0, 0.0, // Смещение по X, Y, Z
+                    0.0         // Скорость частиц
+            );
+
+            // 2. Огненные искры, разлетающиеся из центра взрыва
+            serverWorld.spawnParticles(
+                    ParticleTypes.FLAME,
+                    pX, pY, pZ,
+                    (int)(explosionPower*3),         // Спавним 20 штук
+                    radius * 0.5, radius * 0.5, radius * 0.5, // Разброс в пределах половины радиуса взрыва
+                    0.2         // Скорость разлета (0.2 заставит их красиво разлететься в стороны)
+            );
+
+            // 3. Густой серый дым, поднимающийся вверх
+            serverWorld.spawnParticles(
+                    ParticleTypes.LARGE_SMOKE,
+                    pX, pY, pZ,
+                    (int)(explosionPower*10),         // Спавним 35 частиц дыма
+                    radius * 0.6, radius * 0.6, radius * 0.6, // Разброс дыма по воронке
+                    0.05        // Небольшая скорость, чтобы дым лениво клубился
+            );
+
+
+            // --- ТВОИ КАСТОМНЫЕ ЧАСТИЦЫ ---
+            // Когда ты зарегистрируешь свою кастомную частицу (например, MY_GRENADE_PARTICLE),
+            // ты сможешь спавнить её точно так же.
+            // Раскомментируй и замени ModParticles.MY_GRENADE_PARTICLE на свой класс/поле:
+        /*
+        serverWorld.spawnParticles(
+                ModParticles.MY_GRENADE_PARTICLE,
+                pX, pY, pZ,
+                15,         // Количество твоих частиц
+                0.3, 0.3, 0.3, // Минимальное смещение вокруг гранаты
+                0.1         // Скорость
+        );
+        */
         }
     }
 
