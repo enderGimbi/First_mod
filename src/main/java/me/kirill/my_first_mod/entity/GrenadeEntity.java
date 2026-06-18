@@ -16,19 +16,44 @@ import net.minecraft.network.packet.Packet;
 import net.minecraft.network.packet.s2c.play.EntitySpawnS2CPacket;
 import net.minecraft.util.hit.HitResult;
 import net.minecraft.world.World;
+import software.bernie.geckolib.animatable.GeoEntity;
+import software.bernie.geckolib.core.animatable.GeoAnimatable;
+import software.bernie.geckolib.core.animatable.instance.AnimatableInstanceCache;
+import software.bernie.geckolib.core.animation.AnimatableManager;
+import software.bernie.geckolib.core.animation.AnimationController;
+import software.bernie.geckolib.core.animation.RawAnimation;
+import software.bernie.geckolib.util.GeckoLibUtil;
+
 import java.util.UUID;
 
-public class GrenadeEntity extends ThrownItemEntity {
+public class GrenadeEntity extends ThrownItemEntity implements GeoEntity {
 
     public float explosionPower;
     public int fuseTicks;
+    public float shootVelocity;
+    public float soundVolume;
+
     private static final TrackedData<Boolean> HAS_COLLIDED = DataTracker.registerData(GrenadeEntity.class, TrackedDataHandlerRegistry.BOOLEAN);
     private static final TrackedData<Float> EXPLOSION_POWER = DataTracker.registerData(GrenadeEntity.class, TrackedDataHandlerRegistry.FLOAT);
     private static final TrackedData<Integer> FUSE_TICKS = DataTracker.registerData(GrenadeEntity.class, TrackedDataHandlerRegistry.INTEGER);
+
     private UUID ownerUuid;
 
-    public float shootVelocity;
-    public float soundVolume;
+    private final AnimatableInstanceCache cache = GeckoLibUtil.createInstanceCache(this);
+
+    private final RawAnimation FLY_ANIM = RawAnimation.begin().thenLoop("first_animation");
+
+    @Override
+    public void registerControllers(AnimatableManager.ControllerRegistrar controllers) {
+        controllers.add(new AnimationController<GeoAnimatable>(this,"controller",0,event ->{
+            return event.setAndContinue(FLY_ANIM);
+        }));
+    }
+
+    @Override
+    public AnimatableInstanceCache getAnimatableInstanceCache() {
+        return this.cache;
+    }
 
     // Главный конструктор, который Майнкрафт вызывает автоматически (при спавне, чтении из мира и т.д.)
     public GrenadeEntity(EntityType<GrenadeEntity> entityType, World world) {

@@ -44,10 +44,7 @@ public class My_first_mod implements ModInitializer {
         ModBlocks.registerModBlocks();
         ModItemGroups.registerItemGroups();
         ModItems.registerAttackEvents();
-        net.fabricmc.fabric.api.client.rendering.v1.EntityRendererRegistry.register(
-                ModEntities.GRENADE_TYPE,
-                GrenadeEntityRenderer::new
-        );
+
         ModPackets.registerC2SPackets();
     }
 }

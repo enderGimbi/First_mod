@@ -1,5 +1,6 @@
 package me.kirill.my_first_mod.client;
 
+import me.kirill.my_first_mod.client.render.GrenadeRenderer;
 import me.kirill.my_first_mod.item.Glauncher_v2;
 import me.kirill.my_first_mod.render.AntiSandRenderer;
 import me.kirill.my_first_mod.ModEntities;
@@ -23,6 +24,10 @@ public class My_first_modClient implements ClientModInitializer {
     public void onInitializeClient() {
         // Для отображения антипеска
         EntityRendererRegistry.register(ModEntities.ANTI_SAND_TYPE, AntiSandRenderer::new);
+        EntityRendererRegistry.register(
+                ModEntities.GRENADE_TYPE,
+                GrenadeRenderer::new
+        );
 
         HudRenderCallback.EVENT.register((drawContext, tickDelta) -> {
             MinecraftClient client = MinecraftClient.getInstance();
