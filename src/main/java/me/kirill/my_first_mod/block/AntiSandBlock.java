@@ -18,12 +18,14 @@ public class AntiSandBlock extends Block {
     }
 
     // Срабатывает, когда блок только поставили в мир
+    @SuppressWarnings("deprecation")
     @Override
     public void onBlockAdded(BlockState state, World world, BlockPos pos, BlockState oldState, boolean notify) {
         world.scheduleBlockTick(pos, this, 2); // Заводим таймер проверки на через 2 тика
     }
 
     // Срабатывает, если обновились соседи (например, сломали блок сверху)
+    @SuppressWarnings("deprecation")
     @Override
     public BlockState getStateForNeighborUpdate(BlockState state, Direction direction, BlockState neighborState, WorldAccess world, BlockPos pos, BlockPos neighborPos) {
         world.scheduleBlockTick(pos, this, 2);
@@ -31,6 +33,7 @@ public class AntiSandBlock extends Block {
     }
 
     // Сам тик, где происходит превращение блока в сущность
+    @SuppressWarnings("deprecation")
     @Override
     public void scheduledTick(BlockState state, ServerWorld world, BlockPos pos, Random random) {
         // Проверяем: если сверху воздух/жидкость и мы не на самом краю неба
