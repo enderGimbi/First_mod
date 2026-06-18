@@ -23,6 +23,7 @@ repositories {
     maven {
         url "https://maven.shedaniel.me/"
     }
+    maven { url 'https://dl.cloudsmith.io/public/geckolib3/geckolib/maven/' }
 }
 
 dependencies {
@@ -38,6 +39,7 @@ dependencies {
     // include означает, что библиотека вкомпилируется внутрь твоего мода (игроку не придется качать её отдельно)
     modApi "me.shedaniel.cloth:cloth-config-fabric:11.1.118"
     include "me.shedaniel.cloth:cloth-config-fabric:11.1.118"
+    modImplementation "software.bernie.geckolib:geckolib-fabric-1.20.1:${project.geckolib_version}"
 }
 
 processResources {
@@ -97,5 +99,33 @@ publishing {
         // Notice: This block does NOT have the same function as the block in the top level.
         // The repositories here will be used for publishing your artifact, not for
         // retrieving dependencies.
+    }
+}
+
+tasks.withType(JavaCompile).configureEach {
+    options.encoding = 'UTF-8'
+}
+
+processResources {
+    inputs.property "version", project.version
+
+    // Указываем Gradle, как поступать с дубликатами файлов при сборке
+    duplicatesStrategy = DuplicatesStrategy.INCLUDE
+
+    filesMatching("fabric.mod.json") {
+        expand "version": project.version
+    }
+
+    filesNotMatching("**/*.png") {
+        filteringCharset = 'UTF-8'
+    }
+}
+
+// Дополнительная жесткая инструкция для обработки текстовых ресурсов
+tasks.withType(ProcessResources).configureEach {
+    from(sourceSets.main.resources.srcDirs) {
+        include '**/*.json'
+        include '**/*.lang'
+        filteringCharset = 'UTF-8'
     }
 }
