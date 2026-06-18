@@ -140,27 +140,37 @@ public class GrenadeEntity extends ThrownItemEntity implements GeoEntity {
         if (this.isHasCollided()) {
             this.setVelocity(0.0, 0.0, 0.0);
         } else {
+            // ЛОГИКА СЕРВЕРА (Коллизии)
             if (!this.getWorld().isClient) {
-                // 1. Сохраняем реальную скорость гранаты
                 net.minecraft.util.math.Vec3d actualVelocity = this.getVelocity();
-
-                // 2. Получаем вектор направления полёта (нормализованный, длиной 1.0 блок)
                 net.minecraft.util.math.Vec3d lookVector = this.getRotationVector().normalize();
-
-                // 3. Виртуальная скорость для проверки: реальный шаг + 1.0 блок длины снаряда вперед
                 net.minecraft.util.math.Vec3d checkVelocity = actualVelocity.add(lookVector);
 
-                // Временно устанавливаем увеличенную скорость, чтобы ванильный луч проверил коллизию с учётом длины
                 this.setVelocity(checkVelocity);
-
-                // 4. Вызываем ванильный поиск столкновений (теперь он ищет на 1 блок дальше, учитывая нос гранаты)
                 HitResult hitResult = ProjectileUtil.getCollision(this, this::canHit);
-
-                // Возвращаем реальную физическую скорость обратно, чтобы граната не ускорялась в воздухе
                 this.setVelocity(actualVelocity);
 
                 if (hitResult.getType() != HitResult.Type.MISS) {
                     this.onCollision(hitResult);
+                }
+            }
+            // ЛОГИКА КЛИЕНТА (Трассер из частиц)
+            else {
+                // Спавним частицы только тогда, когда граната реально летит (скорость не нулевая)
+                if (this.getVelocity().lengthSquared() > 0.001) {
+                    // Центрируем частицу по центру хитбокса гранаты
+                    double x = this.getX();
+                    double y = this.getBodyY(0.5); // 0.5 — середина высоты сущности
+                    double z = this.getZ();
+
+                    // Спавним белый след. Каждые несколько под-тиков (или просто 1-2 частицы за тик)
+                    // ParticleTypes.POOF — красивое белое облачко дыма
+                    // Если хочешь тонкую светящуюся линию, замени POOF на END_ROD
+                    this.getWorld().addParticle(
+                            net.minecraft.particle.ParticleTypes.POOF,
+                            x, y, z,
+                            0.0, 0.0, 0.0 // Скорость самой частицы (0.0 означает, что она будет висеть на месте, образуя ровный след)
+                    );
                 }
             }
         }

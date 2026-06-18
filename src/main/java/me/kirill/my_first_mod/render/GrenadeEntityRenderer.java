@@ -11,6 +11,7 @@ import net.minecraft.client.util.math.MatrixStack;
 import net.minecraft.util.Identifier;
 import net.minecraft.util.math.RotationAxis;
 
+@Deprecated
 public class GrenadeEntityRenderer extends EntityRenderer<GrenadeEntity> {
     private final BlockRenderManager blockRenderManager;
 
