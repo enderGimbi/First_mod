@@ -4,7 +4,9 @@ import me.kirill.my_first_mod.ModEntities;
 import me.kirill.my_first_mod.My_first_mod;
 import me.kirill.my_first_mod.util.IPlayerBazookaSettings;
 import net.minecraft.block.BlockState;
+import net.minecraft.block.Blocks;
 import net.minecraft.entity.*;
+import net.minecraft.entity.damage.DamageSource;
 import net.minecraft.entity.data.DataTracker;
 import net.minecraft.entity.data.TrackedData;
 import net.minecraft.entity.data.TrackedDataHandlerRegistry;
@@ -21,6 +23,7 @@ import net.minecraft.sound.SoundCategory;
 import net.minecraft.sound.SoundEvents;
 import net.minecraft.util.hit.HitResult;
 import net.minecraft.util.math.BlockPos;
+import net.minecraft.util.math.Vec3d;
 import net.minecraft.world.World;
 import software.bernie.geckolib.animatable.GeoEntity;
 import software.bernie.geckolib.core.animatable.GeoAnimatable;
@@ -30,7 +33,7 @@ import software.bernie.geckolib.core.animation.AnimationController;
 import software.bernie.geckolib.core.animation.RawAnimation;
 import software.bernie.geckolib.util.GeckoLibUtil;
 
-import java.util.UUID;
+import java.util.*;
 
 public class GrenadeEntity extends ThrownItemEntity implements GeoEntity {
 
@@ -149,9 +152,9 @@ public class GrenadeEntity extends ThrownItemEntity implements GeoEntity {
         } else {
             // ЛОГИКА СЕРВЕРА (Коллизии)
             if (!this.getWorld().isClient) {
-                net.minecraft.util.math.Vec3d actualVelocity = this.getVelocity();
-                net.minecraft.util.math.Vec3d lookVector = this.getRotationVector().normalize();
-                net.minecraft.util.math.Vec3d checkVelocity = actualVelocity.add(lookVector);
+                Vec3d actualVelocity = this.getVelocity();
+                Vec3d lookVector = this.getRotationVector().normalize();
+                Vec3d checkVelocity = actualVelocity.add(lookVector);
 
                 this.setVelocity(checkVelocity);
                 HitResult hitResult = ProjectileUtil.getCollision(this, this::canHit);
@@ -218,14 +221,14 @@ public class GrenadeEntity extends ThrownItemEntity implements GeoEntity {
         );
         java.util.List<LivingEntity> targets = world.getEntitiesByClass(LivingEntity.class, damageBox, Entity::isAlive);
 
-        net.minecraft.entity.LivingEntity grenadeOwner = null;
-        if (this.ownerUuid != null && world instanceof net.minecraft.server.world.ServerWorld serverWorld) {
+        LivingEntity grenadeOwner = null;
+        if (this.ownerUuid != null && world instanceof ServerWorld serverWorld) {
             Entity foundEntity = serverWorld.getEntity(this.ownerUuid);
-            if (foundEntity instanceof net.minecraft.entity.LivingEntity) {
-                grenadeOwner = (net.minecraft.entity.LivingEntity) foundEntity;
+            if (foundEntity instanceof LivingEntity) {
+                grenadeOwner = (LivingEntity) foundEntity;
             }
         }
-        net.minecraft.entity.damage.DamageSource damageSource = world.getDamageSources().explosion(grenade, grenadeOwner);
+        DamageSource damageSource = world.getDamageSources().explosion(grenade, grenadeOwner);
 
         for (LivingEntity target : targets) {
             double distance = target.distanceTo(grenade);
@@ -247,7 +250,7 @@ public class GrenadeEntity extends ThrownItemEntity implements GeoEntity {
         // =========================================================================
         // 2. ФАЗА 1: БЫСТРЫЙ СБОР КООРДИНАТ СФЕРЫ В ПАМЯТЬ
         // =========================================================================
-        java.util.List<net.minecraft.util.math.BlockPos> TargetPositions = new java.util.ArrayList<>();
+        List<BlockPos> TargetPositions = new ArrayList<>();
 
         for (int x = 0; x <= radius; x++) {
             int xSq = x * x;
@@ -260,7 +263,7 @@ public class GrenadeEntity extends ThrownItemEntity implements GeoEntity {
                         for (int sx : x == 0 ? new int[]{0} : new int[]{x, -x}) {
                             for (int sy : y == 0 ? new int[]{0} : new int[]{y, -y}) {
                                 for (int sz : z == 0 ? new int[]{0} : new int[]{z, -z}) {
-                                    TargetPositions.add(new net.minecraft.util.math.BlockPos(centerX + sx, centerY + sy, centerZ + sz));
+                                    TargetPositions.add(new BlockPos(centerX + sx, centerY + sy, centerZ + sz));
                                 }
                             }
                         }
@@ -272,9 +275,9 @@ public class GrenadeEntity extends ThrownItemEntity implements GeoEntity {
         // =========================================================================
         // 3. ФАЗА 2: ВЕКТОРНЫЙ ПРОСЧЕТ ЛУЧЕЙ (С твоей кастомной функцией затухания)
         // =========================================================================
-        java.util.Set<net.minecraft.util.math.BlockPos> blocksToDestroy = new java.util.HashSet<>();
+        Set<BlockPos> blocksToDestroy = new HashSet<>();
 
-        for (net.minecraft.util.math.BlockPos targetPos : TargetPositions) {
+        for (BlockPos targetPos : TargetPositions) {
             double dx = targetPos.getX() - centerX;
             double dy = targetPos.getY() - centerY;
             double dz = targetPos.getZ() - centerZ;
@@ -294,7 +297,7 @@ public class GrenadeEntity extends ThrownItemEntity implements GeoEntity {
                 int checkY = (int) Math.floor(centerY + stepY * d);
                 int checkZ = (int) Math.floor(centerZ + stepZ * d);
 
-                BlockPos currentPos = new net.minecraft.util.math.BlockPos(checkX, checkY, checkZ);
+                BlockPos currentPos = new BlockPos(checkX, checkY, checkZ);
                 BlockState blockState = world.getBlockState(currentPos);
 
                 if (!blockState.isAir()) {
@@ -328,7 +331,7 @@ public class GrenadeEntity extends ThrownItemEntity implements GeoEntity {
             if (world.getBlockState(pos).getBlock().getBlastResistance() < 1200.0f) {
                 // Флаги 2 | 16 стирают блок в воздухе, не вызывая триггеры разрушения,
                 // которые заставляли ломаться и выпадать траву, семена и издавать звуки!
-                world.setBlockState(pos, net.minecraft.block.Blocks.AIR.getDefaultState(), 2 | 16);
+                world.setBlockState(pos, Blocks.AIR.getDefaultState(), 2 | 16);
             }
         }
 

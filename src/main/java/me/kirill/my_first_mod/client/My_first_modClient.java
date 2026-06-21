@@ -1,5 +1,6 @@
 package me.kirill.my_first_mod.client;
 
+import me.kirill.my_first_mod.client.render.GrenadeLauncherRenderer;
 import me.kirill.my_first_mod.client.render.GrenadeRenderer;
 import me.kirill.my_first_mod.item.Glauncher_v2;
 import me.kirill.my_first_mod.render.AntiSandRenderer;
@@ -16,7 +17,6 @@ import net.minecraft.entity.player.PlayerEntity;
 import net.minecraft.util.Hand;
 import net.minecraft.util.Identifier;
 import net.fabricmc.fabric.api.client.rendering.v1.EntityRendererRegistry;
-
 
 public class My_first_modClient implements ClientModInitializer {
 

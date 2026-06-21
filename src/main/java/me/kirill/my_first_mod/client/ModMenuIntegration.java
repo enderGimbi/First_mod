@@ -94,7 +94,7 @@ public class ModMenuIntegration implements ModMenuApi {
             buf.writeFloat(localVolume[0]);
 
             // 4. Отправляем пакет синхронизации на сервер
-            ClientPlayNetworking.send(ModPackets.BAZOOKA_SETTINGS_SYNC, buf);
+            ClientPlayNetworking.send(ModPackets.GLAUNCHER_V2_SETTINGS_SYNC, buf);
         });
 
         return builder.build();

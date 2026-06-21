@@ -2,14 +2,21 @@ package me.kirill.my_first_mod.client.model;
 
 import me.kirill.my_first_mod.entity.GrenadeEntity;
 import net.minecraft.util.Identifier;
+import software.bernie.geckolib.core.animatable.model.CoreBakedGeoModel;
+import software.bernie.geckolib.core.animatable.model.CoreGeoBone;
 import software.bernie.geckolib.model.GeoModel;
 
 public class GrenadeModel extends GeoModel<GrenadeEntity> {
 
+    public static double jsonXOffset = 0.0;
+    public static double jsonYOffset = 0.0;
+    public static double jsonZOffset = 0.0;
+    public static boolean isLocatorFound = false;
+
     @Override
     public Identifier getModelResource(GrenadeEntity animatable) {
         // Указывает на файл геометрии: assets/my_first_mod/geo/grenade.geo.json
-        return new Identifier("my_first_mod", "geo/grenade_entity.geo.json");
+        return new Identifier("my_first_mod", "geo/entity/grenade_entity.geo.json");
     }
 
     @Override
@@ -22,6 +29,6 @@ public class GrenadeModel extends GeoModel<GrenadeEntity> {
     public Identifier getAnimationResource(GrenadeEntity animatable) {
         // Указывает на файл анимаций: assets/my_first_mod/animations/grenade.animation.json
         // Помнишь Object ID "grenade" из Blockbench? Вот он здесь в названии файла!
-        return new Identifier("my_first_mod", "animations/grenade_entity.animation.json");
+        return new Identifier("my_first_mod", "animations/entity/grenade_entity.animation.json");
     }
 }

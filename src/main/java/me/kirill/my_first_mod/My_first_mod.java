@@ -10,6 +10,7 @@ import net.fabricmc.api.ModInitializer;
 import net.fabricmc.fabric.api.networking.v1.ServerPlayConnectionEvents;
 import net.fabricmc.fabric.api.networking.v1.ServerPlayNetworking;
 import net.minecraft.server.network.ServerPlayerEntity;
+import software.bernie.geckolib.core.animatable.GeoAnimatable;
 
 public class My_first_mod implements ModInitializer {
 
@@ -46,5 +47,7 @@ public class My_first_mod implements ModInitializer {
         ModItems.registerAttackEvents();
 
         ModPackets.registerC2SPackets();
+        // Регистрируем наш предмет в GeckoLib для работы триггеров анимаций
+        software.bernie.geckolib.animatable.SingletonGeoAnimatable.registerSyncedAnimatable((GeoAnimatable) ModItems.GLAUNCHER_V2);
     }
 }
