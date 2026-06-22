@@ -72,8 +72,8 @@ public class ModPackets {
                     serverWorld.playSound(null, muzzlePos.x, muzzlePos.y, muzzlePos.z, SoundEvents.ENTITY_WITHER_SHOOT, SoundCategory.PLAYERS, settings.getSoundVolume(), pitch);
 
                     // 3. Базовые эффекты на дуле
-                    //serverWorld.spawnParticles(ParticleTypes.EXPLOSION, muzzlePos.x, muzzlePos.y, muzzlePos.z, 1, 0, 0, 0, 0);
-                    //serverWorld.spawnParticles(ParticleTypes.FLAME, muzzlePos.x, muzzlePos.y, muzzlePos.z, 5, 0.05, 0.05, 0.05, 0.1);
+                    serverWorld.spawnParticles(ParticleTypes.EXPLOSION, muzzlePos.x, muzzlePos.y, muzzlePos.z, 1, 0, 0, 0, 0);
+                    serverWorld.spawnParticles(ParticleTypes.FLAME, muzzlePos.x, muzzlePos.y, muzzlePos.z, 5, 0.05, 0.05, 0.05, 0.1);
 
                     // 4. НАПРАВЛЕННЫЙ СПАВН ПАРТИКЛОВ НАЗАД (ПРОТИВОВЕС ВЗГЛЯДУ)
                     // Получаем вектор взгляда игрока (для Yarn: getRotationVector, для Mojang: getLookAngle)

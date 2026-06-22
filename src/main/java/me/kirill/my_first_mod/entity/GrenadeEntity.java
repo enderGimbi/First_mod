@@ -213,8 +213,23 @@ public class GrenadeEntity extends ThrownItemEntity implements GeoEntity {
         int centerZ = (int) Math.floor(grenade.getZ());
 
         // =========================================================================
-        // 1. УРОН ПО МОБАМ
+        // 1. УРОН ПО МОБАМ (Динамический расчет от Силы Взрыва + Затухание к краям)
         // =========================================================================
+        // Мин/Макс урон при минимальной/максимальной силе взрыва (балансируй эти цифры)
+        float damageAtMinPower = 100.0f; // Урон в центре, если сила взрыва минимальна
+        float damageAtMaxPower = 500.0f; // Урон в центре, если сила взрыва максимальна
+
+        // Границы самой силы взрыва для калибровки твоей формулы
+        float minAllowedPower = 1.0f;
+        float maxAllowedPower = 50.0f;
+
+        // Вычисляем коэффициент силы взрыва конкретно для расчета урона (от 0.0 до 1.0)
+        float damagePowerRatio = (maxPower - minAllowedPower) / (maxAllowedPower - minAllowedPower);
+        damagePowerRatio = Math.max(0.0f, Math.min(1.0f, damagePowerRatio)); // Ограничиваем в пределах [0, 1]
+
+        // Шаг 1: Находим урон в самом эпицентре конкретно для ТЕКУЩЕЙ силы взрыва
+        float damageInEpicenter = damageAtMinPower + (damageAtMaxPower - damageAtMinPower) * damagePowerRatio;
+
         net.minecraft.util.math.Box damageBox = new net.minecraft.util.math.Box(
                 grenade.getX() - radius, grenade.getY() - radius, grenade.getZ() - radius,
                 grenade.getX() + radius, grenade.getY() + radius, grenade.getZ() + radius
@@ -232,16 +247,33 @@ public class GrenadeEntity extends ThrownItemEntity implements GeoEntity {
 
         for (LivingEntity target : targets) {
             double distance = target.distanceTo(grenade);
-            if (distance <= radius) {
-                float damageMultiplier = 1.0f - (float)(distance / radius);
-                target.damage(damageSource, maxPower * 2.0f * damageMultiplier);
 
+            if (distance <= radius) {
+                // Шаг 2: Считаем падение урона от центра к краям взрывной волны
+                float distanceMultiplier = 1.0f - (float)(distance / radius);
+                distanceMultiplier = Math.max(0.0f, Math.min(1.0f, distanceMultiplier));
+
+                // Итоговый урон: базовый урон эпицентра умножаем на близость моба к центру
+                float finalDamage = damageInEpicenter * distanceMultiplier;
+
+                // Небольшая защита: если моба задело самым краем, нанесем хотя бы 1 единицу урона
+                if (finalDamage < 1.0f && distanceMultiplier > 0.05f) {
+                    finalDamage = 1.0f;
+                }
+
+                target.damage(damageSource, finalDamage);
+
+                // Твоя физика отдачи
                 double dirX = target.getX() - grenade.getX();
                 double dirY = target.getY() - grenade.getY();
                 double dirZ = target.getZ() - grenade.getZ();
                 double len = Math.sqrt(dirX * dirX + dirY * dirY + dirZ * dirZ);
                 if (len > 0) {
-                    target.addVelocity((dirX / len) * damageMultiplier * 1.5, (dirY / len) * damageMultiplier * 1.2 + 0.2, (dirZ / len) * damageMultiplier * 1.5);
+                    target.addVelocity(
+                            (dirX / len) * distanceMultiplier * 1.5,
+                            (dirY / len) * distanceMultiplier * 1.2 + 0.2,
+                            (dirZ / len) * distanceMultiplier * 1.5
+                    );
                     target.velocityModified = true;
                 }
             }
@@ -356,7 +388,7 @@ public class GrenadeEntity extends ThrownItemEntity implements GeoEntity {
         // =========================================================================
         if (world instanceof ServerWorld serverWorld) {
             double pX = grenade.getX();
-            double pY = grenade.getY();
+            double pY = grenade.getY() + 0.1;
             double pZ = grenade.getZ();
 
             // --- ВАНИЛЬНЫЕ ЧАСТИЦЫ ---
