@@ -11,6 +11,7 @@ import net.minecraft.util.Arm;
 import net.minecraft.util.Identifier;
 import net.minecraft.util.math.MathHelper;
 import net.minecraft.util.math.Vec3d;
+import org.jetbrains.annotations.Nullable;
 
 import java.io.InputStreamReader;
 import java.nio.charset.StandardCharsets;
@@ -20,23 +21,40 @@ import java.util.Map;
 public class ModMathUtils {
 
     // =========================================================================
-    // НАСТРОЙКА КОРРЕКЦИИ ДЛЯ КРИТИЧЕСКИХ УГЛОВ (В БЛОКАХ)
+    // ДЕФОЛТНЫЕ ЗНАЧЕНИЯ (ЕСЛИ ПАРАМЕТРЫ НЕ ПЕРЕДАНЫ)
     // =========================================================================
-    // Величина сдвига вперёд/назад при приближении к углам 90 градусов.
-    // Если граната всё ещё близко к лицу при взгляде строго вверх/вниз, увеличь это число (например, до 0.5).
-    private static final double PITCH_XZ_CORRECTION = -0.5;
-    // =========================================================================
-
-    // =========================================================================
-    // ОБЩАЯ НАСТРОЙКА ВЫСОТЫ ВЫСТРЕЛА ОТНОСИТЕЛЬНО ДУЛА
-    private static final double Y_CORRECTION = 0.8;
-    // =========================================================================
+    private static final double DEFAULT_PITCH_UP = -0.5;
+    private static final double DEFAULT_PITCH_DOWN = -0.4;
+    private static final double DEFAULT_Y_CORRECTION = 0.8;
 
     /**
-     * Чистый метод расчета мировых координат на основе точного локатора без подмен.
+     * 1. КОРОТКИЙ ВАРИАНТ (Для обычного выстрела без кастомных настроек).
+     * Автоматически подставит дефолтные значения -0.5, -0.4 и 0.8
      */
     public static Vec3d getDynamicWorldPosition(PlayerEntity player, Hand hand, double localX, double localY, double localZ) {
-        // Базовая точка — глаза игрока (от неё идёт весь расчёт)
+        return getDynamicWorldPosition(player, hand, localX, localY, localZ, null, null, null);
+    }
+
+    /**
+     * 2. ПОЛНЫЙ ВАРИАНТ (Основной метод, который выполняет всю математику).
+     * Принимает Double (объектный класс), чтобы параметры могли быть null.
+     */
+    public static Vec3d getDynamicWorldPosition(
+            PlayerEntity player,
+            Hand hand,
+            double localX,
+            double localY,
+            double localZ,
+            @Nullable Double upCorrection,
+            @Nullable Double downCorrection,
+            @Nullable Double yCorrection
+    ) {
+        // Если параметры переданы как null, берем стандартные константы
+        double pitchUpConfig = (upCorrection != null) ? upCorrection : DEFAULT_PITCH_UP;
+        double pitchDownConfig = (downCorrection != null) ? downCorrection : DEFAULT_PITCH_DOWN;
+        double yCorrectionConfig = (yCorrection != null) ? yCorrection : DEFAULT_Y_CORRECTION;
+
+        // Базовая точка — глаза игрока
         double baseX = player.getX();
         double baseY = player.getEyeY();
         double baseZ = player.getZ();
@@ -47,12 +65,11 @@ public class ModMathUtils {
             isLeftArm = !isLeftArm;
         }
 
-        // В Blockbench X идёт налево, поэтому для правой руки инвертируем его в правую сторону
         if (!isLeftArm) {
             localX = -localX;
         }
 
-        // Переводим углы Yaw (поворот тела) и Pitch (наклон головы) в радианы
+        // Переводим углы в радианы
         float yaw = player.getYaw() * MathHelper.RADIANS_PER_DEGREE;
         float pitch = player.getPitch() * MathHelper.RADIANS_PER_DEGREE;
 
@@ -62,16 +79,26 @@ public class ModMathUtils {
         float sinPitch = MathHelper.sin(pitch);
 
         // ИДЕАЛЬНАЯ МАТРИЦА СФЕРИЧЕСКОГО ВРАЩЕНИЯ
+        // (Применяем выбранную высоту yCorrectionConfig)
         double worldX = localX * cosYaw - localY * sinYaw * sinPitch - localZ * sinYaw * cosPitch;
-        double worldY = localY * cosPitch - localZ * sinPitch - Y_CORRECTION;
+        double worldY = localY * cosPitch - localZ * sinPitch - yCorrectionConfig;
         double worldZ = localX * sinYaw + localY * cosYaw * sinPitch + localZ * cosYaw * cosPitch;
 
-        // 2. ТОЧЕЧНАЯ КОРРЕКЦИЯ МИРОВЫХ X И Z НА КРИТИЧЕСКИХ УГЛАХ
-        // sinPitch плавно меняется от -1 (взгляд вверх) до 1 (взгляд вниз).
-        // Мы умножаем его на направление взгляда игрока (sinYaw / cosYaw) и коэффициент коррекции.
-        // Это плавно сдвинет точку спавна вперёд по горизонтали, выводя её из плоскости головы.
-        double correctionMagnitude = sinPitch * PITCH_XZ_CORRECTION;
+        // 2. РАЗДЕЛЬНАЯ ГОРИЗОНТАЛЬНАЯ КОРРЕКЦИЯ (ВВЕРХ / ВНИЗ)
+        double currentCorrectionConfig = 0.0;
 
+        // В Майнкрафте pitch < 0 означает, что игрок смотрит ВВЕРХ
+        if (player.getPitch() < 0) {
+            currentCorrectionConfig = pitchUpConfig;
+        } else {
+            // Игрок смотрит прямо или ВНИЗ
+            currentCorrectionConfig = pitchDownConfig;
+        }
+
+        // Вычисляем итоговую силу сдвига на основе выбранного конфига
+        double correctionMagnitude = sinPitch * currentCorrectionConfig;
+
+        // Применяем сдвиг вдоль горизонтального направления взгляда
         worldX -= sinYaw * correctionMagnitude;
         worldZ += cosYaw * correctionMagnitude;
 

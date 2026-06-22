@@ -9,6 +9,7 @@ import me.kirill.my_first_mod.util.IPlayerBazookaSettings;
 import net.fabricmc.fabric.api.client.networking.v1.ClientPlayNetworking;
 import net.fabricmc.fabric.api.networking.v1.PacketByteBufs;
 import net.minecraft.client.render.item.BuiltinModelItemRenderer;
+import net.minecraft.client.render.model.json.ModelTransformationMode;
 import net.minecraft.entity.player.PlayerEntity;
 import net.minecraft.item.ItemStack;
 import net.minecraft.network.PacketByteBuf;
@@ -24,10 +25,12 @@ import net.minecraft.util.math.Vec3d;
 import net.minecraft.world.World;
 import software.bernie.geckolib.animatable.GeoItem;
 import software.bernie.geckolib.animatable.client.RenderProvider;
+import software.bernie.geckolib.constant.DataTickets;
 import software.bernie.geckolib.core.animatable.instance.AnimatableInstanceCache;
 import software.bernie.geckolib.core.animation.AnimatableManager;
 import software.bernie.geckolib.core.animation.AnimationController;
 import software.bernie.geckolib.core.animation.RawAnimation;
+import software.bernie.geckolib.core.object.DataTicket;
 import software.bernie.geckolib.core.object.PlayState;
 import software.bernie.geckolib.util.GeckoLibUtil;
 
@@ -109,7 +112,22 @@ public class Glauncher_v2 extends GLauncher implements GeoItem {
     public void registerControllers(AnimatableManager.ControllerRegistrar controllers) {
         // Чистый и стабильный контроллер без внутренних обработчиков GeckoLib
         controllers.add(new AnimationController<>(this, "shoot_controller", 0,
-                state -> software.bernie.geckolib.core.object.PlayState.CONTINUE)
+                state -> {
+                    ModelTransformationMode transformMode = state.getData(DataTickets.ITEM_RENDER_PERSPECTIVE);
+
+                    if(transformMode==null)
+                        return PlayState.STOP;
+
+                    if(transformMode == ModelTransformationMode.GUI ||
+                    transformMode == ModelTransformationMode.GROUND ||
+                    transformMode == ModelTransformationMode.FIXED ||
+                    transformMode == ModelTransformationMode.HEAD){
+                        state.getController().stop();
+                        return PlayState.STOP;
+                    }
+
+                    return PlayState.CONTINUE;
+                })
                 .triggerableAnim("shoot", SHOOT_ANIM));
     }
 
