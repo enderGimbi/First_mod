@@ -569,8 +569,8 @@
 					"parent": "glauncher",
 					"pivot": [0, 8, -17],
 					"locators": {
-						"for_fire": [0, 8, -17],
-						"for_grenade": [0, 8, 18]
+						"for_fire": [0, 10, -17],
+						"for_grenade": [0, 6, 18]
 					}
 				}
 			]

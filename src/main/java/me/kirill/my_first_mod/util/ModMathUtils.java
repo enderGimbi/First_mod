@@ -4,14 +4,18 @@ import com.google.gson.JsonArray;
 import com.google.gson.JsonElement;
 import com.google.gson.JsonObject;
 import com.google.gson.JsonParser;
+import me.kirill.my_first_mod.item.Glauncher_v2;
 import net.minecraft.client.MinecraftClient;
 import net.minecraft.entity.player.PlayerEntity;
+import net.minecraft.item.ItemStack;
 import net.minecraft.util.Hand;
 import net.minecraft.util.Arm;
 import net.minecraft.util.Identifier;
 import net.minecraft.util.math.MathHelper;
 import net.minecraft.util.math.Vec3d;
 import org.jetbrains.annotations.Nullable;
+import org.joml.Quaternionf;
+import org.joml.Vector3f;
 
 import java.io.InputStreamReader;
 import java.nio.charset.StandardCharsets;
@@ -28,81 +32,77 @@ public class ModMathUtils {
     private static final double DEFAULT_Y_CORRECTION = 0.8;
 
     /**
-     * 1. КОРОТКИЙ ВАРИАНТ (Для обычного выстрела без кастомных настроек).
-     * Автоматически подставит дефолтные значения -0.5, -0.4 и 0.8
+     * Рассчитывает мировые координаты точки оружия, используя в качестве
+     * опорного элемента (Pivot) ось поворота плеча конкретной руки игрока.
+     *
+     * @param player   Игрок
+     * @param hand     Какая рука делает выстрел (MAIN_HAND или OFF_HAND)
+     * @param localPos Локальный вектор точки из JSON-парсера (в блоках, например, деленный на 16)
      */
-    public static Vec3d getDynamicWorldPosition(PlayerEntity player, Hand hand, double localX, double localY, double localZ) {
-        return getDynamicWorldPosition(player, hand, localX, localY, localZ, null, null, null);
-    }
+    public static Vec3d getDynamicWorldPosition(PlayerEntity player, Hand hand, Vec3d localPos) {
+        if (localPos == null) return player.getEyePos();
 
-    /**
-     * 2. ПОЛНЫЙ ВАРИАНТ (Основной метод, который выполняет всю математику).
-     * Принимает Double (объектный класс), чтобы параметры могли быть null.
-     */
-    public static Vec3d getDynamicWorldPosition(
-            PlayerEntity player,
-            Hand hand,
-            double localX,
-            double localY,
-            double localZ,
-            @Nullable Double upCorrection,
-            @Nullable Double downCorrection,
-            @Nullable Double yCorrection
-    ) {
-        // Если параметры переданы как null, берем стандартные константы
-        double pitchUpConfig = (upCorrection != null) ? upCorrection : DEFAULT_PITCH_UP;
-        double pitchDownConfig = (downCorrection != null) ? downCorrection : DEFAULT_PITCH_DOWN;
-        double yCorrectionConfig = (yCorrection != null) ? yCorrection : DEFAULT_Y_CORRECTION;
-
-        // Базовая точка — глаза игрока
-        double baseX = player.getX();
-        double baseY = player.getEyeY();
-        double baseZ = player.getZ();
-
-        // 1. ЛОГИКА РУК (Зеркалирование X)
-        boolean isLeftArm = player.getMainArm() == Arm.LEFT;
-        if (hand == Hand.OFF_HAND) {
-            isLeftArm = !isLeftArm;
-        }
-
-        if (!isLeftArm) {
-            localX = -localX;
-        }
-
-        // Переводим углы в радианы
-        float yaw = player.getYaw() * MathHelper.RADIANS_PER_DEGREE;
-        float pitch = player.getPitch() * MathHelper.RADIANS_PER_DEGREE;
-
-        float cosYaw = MathHelper.cos(yaw);
-        float sinYaw = MathHelper.sin(yaw);
-        float cosPitch = MathHelper.cos(pitch);
-        float sinPitch = MathHelper.sin(pitch);
-
-        // ИДЕАЛЬНАЯ МАТРИЦА СФЕРИЧЕСКОГО ВРАЩЕНИЯ
-        // (Применяем выбранную высоту yCorrectionConfig)
-        double worldX = localX * cosYaw - localY * sinYaw * sinPitch - localZ * sinYaw * cosPitch;
-        double worldY = localY * cosPitch - localZ * sinPitch - yCorrectionConfig;
-        double worldZ = localX * sinYaw + localY * cosYaw * sinPitch + localZ * cosYaw * cosPitch;
-
-        // 2. РАЗДЕЛЬНАЯ ГОРИЗОНТАЛЬНАЯ КОРРЕКЦИЯ (ВВЕРХ / ВНИЗ)
-        double currentCorrectionConfig = 0.0;
-
-        // В Майнкрафте pitch < 0 означает, что игрок смотрит ВВЕРХ
-        if (player.getPitch() < 0) {
-            currentCorrectionConfig = pitchUpConfig;
+        // Определение руки из которой произведен выстрел
+        boolean isRightArm = true;
+        if (hand == Hand.MAIN_HAND) {
+            isRightArm = player.getMainArm() == Arm.RIGHT;
         } else {
-            // Игрок смотрит прямо или ВНИЗ
-            currentCorrectionConfig = pitchDownConfig;
+            isRightArm = player.getMainArm() == Arm.LEFT;
         }
 
-        // Вычисляем итоговую силу сдвига на основе выбранного конфига
-        double correctionMagnitude = sinPitch * currentCorrectionConfig;
+        // Задаем смещение плечевого сустава относительно центра глаз (EyePos)
+        float armOffsetSign = isRightArm ? -1.0f : 1.0f;
+        Vector3f shoulderPivot = new Vector3f(
+                0.35f * armOffsetSign, // Смещение вбок к суставу
+                -0.5f,                 // Смещение вниз от линии глаз
+                0.0f                   // На оси тела
+        );
 
-        // Применяем сдвиг вдоль горизонтального направления взгляда
-        worldX -= sinYaw * correctionMagnitude;
-        worldZ += cosYaw * correctionMagnitude;
+        ItemStack stack = player.getStackInHand(hand);
+        float scale = 1.0f;
 
-        return new Vec3d(baseX + worldX, baseY + worldY, baseZ + worldZ);
+        if(stack.getItem() instanceof RotatableWeapon weapon){
+            scale = weapon.getThirdPersonScale();
+        }
+
+        // Берем локальные координаты ствола/партикла из парсера
+        float x = (float) localPos.x * scale;
+        float y = (float) localPos.y * scale;
+        float z = (float) localPos.z * scale;
+
+        // Если оружие в левой руке, зеркалим локальную координату X самого ствола
+        if (!isRightArm) {
+            x = -x;
+        }
+
+        // Вектор от плеча до дула
+        Vector3f localOffset = new Vector3f(x, y, z);
+
+        // Поворот системы координат
+        // Получаем углы поворота тела и головы игрока
+        float yawRad = (float) Math.toRadians(-player.getYaw());
+        float pitchRad = (float) Math.toRadians(player.getPitch());
+
+        // Кватернион общего вращения игрока
+        Quaternionf playerRotation = new Quaternionf()
+                .rotationY(yawRad)
+                .rotateX(pitchRad);
+
+        // Поворачиваем точку сустава плеча (чтобы плечо двигалось вместе с поворотом тела)
+        shoulderPivot.rotate(playerRotation);
+
+        // Поворачиваем локальный вектор ствола вокруг этого плеча
+        localOffset.rotate(playerRotation);
+
+        // Итоговая позиция в мире:
+        // Позиция Глаз + Позиция повернутого Плеча + Позиция повернутого Ствола
+        Vec3d eyePos = player.getEyePos();
+
+        return new Vec3d(
+                eyePos.x + shoulderPivot.x + localOffset.x,
+                eyePos.y + shoulderPivot.y + localOffset.y,
+                eyePos.z + shoulderPivot.z + localOffset.z
+        );
     }
 
 
@@ -129,7 +129,6 @@ public class ModMathUtils {
             // Читаем файл из ресурсов Майнкрафта
             var resource = MinecraftClient.getInstance().getResourceManager().getResource(modelPath);
             if (resource.isEmpty()) {
-                System.out.println("[ModParser] Файл модели не найден по пути: " + modelPath);
                 return Vec3d.ZERO;
             }
 
@@ -167,7 +166,6 @@ public class ModMathUtils {
 
                                         // Сохраняем в кэш и логируем успех
                                         LOCATOR_CACHE.put(cacheKey, localPos);
-                                        System.out.println("[ModParser] Успешно загружен локатор " + locatorName + ": " + localPos);
                                         return localPos;
                                     }
                                 }
@@ -177,7 +175,6 @@ public class ModMathUtils {
                 }
             }
         } catch (Exception e) {
-            System.out.println("[ModParser] Ошибка при парсинге локатора " + locatorName);
             e.printStackTrace();
         }
 
