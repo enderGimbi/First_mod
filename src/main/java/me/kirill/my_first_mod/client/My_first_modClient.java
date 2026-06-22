@@ -1,13 +1,13 @@
 package me.kirill.my_first_mod.client;
 
-import me.kirill.my_first_mod.client.render.GrenadeLauncherRenderer;
+import me.kirill.my_first_mod.ModEntities;
+import me.kirill.my_first_mod.ModItems;
 import me.kirill.my_first_mod.client.render.GrenadeRenderer;
 import me.kirill.my_first_mod.item.Glauncher_v2;
 import me.kirill.my_first_mod.render.AntiSandRenderer;
-import me.kirill.my_first_mod.ModEntities;
-import me.kirill.my_first_mod.ModItems;
 import me.kirill.my_first_mod.util.IPlayerBazookaSettings;
 import net.fabricmc.api.ClientModInitializer;
+import net.fabricmc.fabric.api.client.rendering.v1.EntityRendererRegistry;
 import net.fabricmc.fabric.api.client.rendering.v1.HudRenderCallback;
 import net.minecraft.client.MinecraftClient;
 import net.minecraft.client.font.TextRenderer;
@@ -16,7 +16,6 @@ import net.minecraft.client.item.ModelPredicateProviderRegistry;
 import net.minecraft.entity.player.PlayerEntity;
 import net.minecraft.util.Hand;
 import net.minecraft.util.Identifier;
-import net.fabricmc.fabric.api.client.rendering.v1.EntityRendererRegistry;
 
 public class My_first_modClient implements ClientModInitializer {
 

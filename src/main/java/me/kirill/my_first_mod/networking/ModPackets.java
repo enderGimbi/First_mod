@@ -5,13 +5,11 @@ import me.kirill.my_first_mod.entity.GrenadeEntity;
 import me.kirill.my_first_mod.util.IPlayerBazookaSettings;
 import net.fabricmc.fabric.api.networking.v1.ServerPlayNetworking;
 import net.minecraft.particle.ParticleTypes;
-import net.minecraft.server.network.ServerPlayerEntity;
 import net.minecraft.server.world.ServerWorld;
 import net.minecraft.sound.SoundCategory;
 import net.minecraft.sound.SoundEvents;
 import net.minecraft.util.Identifier;
 import net.minecraft.util.math.Vec3d;
-import org.lwjgl.opengl.WGLARBRobustnessApplicationIsolation;
 
 public class ModPackets {
     // Идентификаторы сетевого пакета

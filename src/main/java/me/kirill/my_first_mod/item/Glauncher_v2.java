@@ -1,12 +1,7 @@
 package me.kirill.my_first_mod.item;
 
-import com.terraformersmc.modmenu.util.mod.Mod;
-import me.kirill.my_first_mod.ModEntities;
-import me.kirill.my_first_mod.client.model.GrenadeLauncherModel;
 import me.kirill.my_first_mod.client.render.GrenadeLauncherRenderer;
-import me.kirill.my_first_mod.entity.GrenadeEntity;
 import me.kirill.my_first_mod.networking.ModPackets;
-import me.kirill.my_first_mod.util.IPlayerBazookaSettings;
 import me.kirill.my_first_mod.util.ModMathUtils;
 import me.kirill.my_first_mod.util.RotatableWeapon;
 import net.fabricmc.fabric.api.client.networking.v1.ClientPlayNetworking;
@@ -16,11 +11,6 @@ import net.minecraft.client.render.model.json.ModelTransformationMode;
 import net.minecraft.entity.player.PlayerEntity;
 import net.minecraft.item.ItemStack;
 import net.minecraft.network.PacketByteBuf;
-import net.minecraft.particle.ParticleTypes;
-import net.minecraft.server.network.ServerPlayerEntity;
-import net.minecraft.server.world.ServerWorld;
-import net.minecraft.sound.SoundCategory;
-import net.minecraft.sound.SoundEvents;
 import net.minecraft.util.Hand;
 import net.minecraft.util.Identifier;
 import net.minecraft.util.TypedActionResult;
@@ -86,17 +76,6 @@ public class Glauncher_v2 extends GLauncher implements GeoItem, RotatableWeapon 
             // Чтение координат через кастомный парсер
             Vec3d for_grenade = ModMathUtils.getLocatorPath(geoPath, "for_grenade");
             Vec3d for_fire = ModMathUtils.getLocatorPath(geoPath,"for_fire");
-
-
-            // Если парсер вернул нули (файл не прочитался), подставим безопасный дефолт, чтобы не спавнить в голове
-//            double gx = for_grenade.x == 0 ? 0.35 : for_grenade.x;
-//            double gy = for_grenade.y == 0 ? -0.15 : for_grenade.y;
-//            double gz = for_grenade.z == 0 ? 0.65 : for_grenade.z;
-//
-//            double fx = for_fire.x == 0 ? 0.35 : for_fire.x;
-//            double fy = for_fire.y == 0 ? -0.15 : for_fire.y;
-//            double fz = for_fire.z == 0 ? -0.65 : for_fire.z;
-
 
             // Обработка координат через утилиту
             Vec3d finalWorldPos = ModMathUtils.getDynamicWorldPosition(

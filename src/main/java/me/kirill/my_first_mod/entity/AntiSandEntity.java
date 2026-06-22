@@ -3,7 +3,6 @@ package me.kirill.my_first_mod.entity;
 import me.kirill.my_first_mod.ModBlocks;
 import me.kirill.my_first_mod.ModEntities;
 import net.minecraft.block.BlockState;
-import net.minecraft.block.Blocks;
 import net.minecraft.entity.Entity;
 import net.minecraft.entity.EntityType;
 import net.minecraft.nbt.NbtCompound;

@@ -2,16 +2,9 @@ package me.kirill.my_first_mod.client.model;
 
 import me.kirill.my_first_mod.entity.GrenadeEntity;
 import net.minecraft.util.Identifier;
-import software.bernie.geckolib.core.animatable.model.CoreBakedGeoModel;
-import software.bernie.geckolib.core.animatable.model.CoreGeoBone;
 import software.bernie.geckolib.model.GeoModel;
 
 public class GrenadeModel extends GeoModel<GrenadeEntity> {
-
-    public static double jsonXOffset = 0.0;
-    public static double jsonYOffset = 0.0;
-    public static double jsonZOffset = 0.0;
-    public static boolean isLocatorFound = false;
 
     @Override
     public Identifier getModelResource(GrenadeEntity animatable) {

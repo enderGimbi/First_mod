@@ -4,16 +4,13 @@ import com.google.gson.JsonArray;
 import com.google.gson.JsonElement;
 import com.google.gson.JsonObject;
 import com.google.gson.JsonParser;
-import me.kirill.my_first_mod.item.Glauncher_v2;
 import net.minecraft.client.MinecraftClient;
 import net.minecraft.entity.player.PlayerEntity;
 import net.minecraft.item.ItemStack;
-import net.minecraft.util.Hand;
 import net.minecraft.util.Arm;
+import net.minecraft.util.Hand;
 import net.minecraft.util.Identifier;
-import net.minecraft.util.math.MathHelper;
 import net.minecraft.util.math.Vec3d;
-import org.jetbrains.annotations.Nullable;
 import org.joml.Quaternionf;
 import org.joml.Vector3f;
 
@@ -23,13 +20,6 @@ import java.util.HashMap;
 import java.util.Map;
 
 public class ModMathUtils {
-
-    // =========================================================================
-    // ДЕФОЛТНЫЕ ЗНАЧЕНИЯ (ЕСЛИ ПАРАМЕТРЫ НЕ ПЕРЕДАНЫ)
-    // =========================================================================
-    private static final double DEFAULT_PITCH_UP = -0.5;
-    private static final double DEFAULT_PITCH_DOWN = -0.4;
-    private static final double DEFAULT_Y_CORRECTION = 0.8;
 
     /**
      * Рассчитывает мировые координаты точки оружия, используя в качестве
@@ -147,12 +137,10 @@ public class ModMathUtils {
                         for (JsonElement boneElement : bones) {
                             JsonObject bone = boneElement.getAsJsonObject();
 
-                            // Ищем нашу кость "locators"
                             if (bone.has("name") && bone.get("name").getAsString().equals("locators")) {
                                 if (bone.has("locators")) {
                                     JsonObject locatorsObj = bone.getAsJsonObject("locators");
 
-                                    // Ищем наш заветный локатор "for_fire"
                                     if (locatorsObj.has(locatorName)) {
                                         JsonArray coords = locatorsObj.getAsJsonArray(locatorName);
 
